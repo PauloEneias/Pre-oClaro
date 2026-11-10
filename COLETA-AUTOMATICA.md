@@ -195,3 +195,12 @@ Não testado:
 - Cerca de 5% dos produtos do Atacadão ficam de fora por não terem EAN válido (itens por peso, hortifrúti, códigos internos).
 - A coleta depende do formato atual do site. Se ele mudar, a execução passa a `FALHA` com a mensagem do erro e os últimos preços válidos permanecem.
 - `ofertas` guarda só o preço unitário (a chave única da tabela é produto + loja); as faixas de atacado ficam no catálogo e em `observacoes_preco`.
+
+## Atualização de 10/11/2026 (finalização full stack)
+
+- **Fotos dos produtos.** Os dois coletores passaram a guardar a foto que cada site publica junto com o código de barras (tabela `produto_imagens`, com a fonte). Só são aceitas imagens HTTPS dos CDNs das próprias redes. As fotos entram na **próxima coleta**; nenhuma coleta foi executada para isso.
+- **Processo separado.** `npm run worker` roda só os coletores. A API só agenda coletas quando `RUN_COLLECTORS_IN_API=true` (padrão em desenvolvimento, desligado em produção).
+- **Trava entre processos.** `runMarketCollection` usa `GET_LOCK` no MySQL; dois processos não coletam ao mesmo tempo.
+- **Erro corrigido.** Duas coletas do Mateus terminaram em `FALHA` por um erro de collation ao preencher ofertas geolocalizadas depois de ligar uma unidade ao mapa. A comparação foi corrigida, a rotina passou a não derrubar a coleta e as ofertas das unidades Hiper Renascença e Express foram preenchidas a partir dos preços já gravados.
+- **Coleta pausada.** Durante a refatoração foi acrescentado `LIVE_SCRAPE_ENABLED=false` ao `backend/.env`. Para retomar a coleta automática, troque para `true` (ou apague a linha) e reinicie o servidor.
+- **Unidades ligadas ao mapa**: Atacadão São Luís, Mateus Cohama, Mix Mateus Vinhais, Hiper Mateus Renascença e Mateus Mais Express. Sem ligação: Spazio Mateus e Mateus Food Express.

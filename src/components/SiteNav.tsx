@@ -21,6 +21,10 @@ export default function SiteNav(){
       <NavLink className={({isActive})=>`p6-nav-link p6-nav-link-icon ${isActive?'selected':''}`} to="/estabelecimentos" onClick={close}><MapPin size={14} aria-hidden="true"/> Mercados próximos</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/conferir" onClick={close}>Conferir caixa</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/listas" onClick={close}>Listas</NavLink>
+      {/* No menu recolhido (tablet e celular) a conta fica aqui dentro. */}
+      {!authLoading&&<div className="p6-nav-auth">{user
+        ? <><Link className="p6-enter" to="/perfil" onClick={close}><CircleUserRound size={16} aria-hidden="true"/> {firstName}</Link><button type="button" className="p6-enter" onClick={()=>{close();void signOut();}}><LogOut size={15} aria-hidden="true"/> Sair</button></>
+        : <><Link className="p6-enter" to="/entrar" onClick={close}>Entrar</Link><Link className="p6-create" to="/criar-conta" onClick={close}>Criar conta</Link></>}</div>}
     </nav>
     <div className="p6-header-right">
       <div className="p6-location">
