@@ -42,6 +42,8 @@ export type CollectedOffer = {
   collectedAt: string;
   /** SKU interno da rede, só para rastreio. */
   externalSku: string;
+  /** Foto do produto publicada pela própria fonte junto com este GTIN; null se não houver. */
+  imageUrl?: string | null;
 };
 
 export type RawOffer = Omit<CollectedOffer, 'gtin' | 'size' | 'price' | 'listPrice'> & {
@@ -97,6 +99,28 @@ const toMoney = (value: unknown): number | null => {
 };
 
 const clean = (text: unknown) => String(text ?? '').replace(/\s+/g, ' ').trim();
+
+/** CDNs em que cada rede hospeda as fotos dos próprios produtos. */
+const IMAGE_HOSTS: Partial<Record<PriceSource, RegExp>> = {
+  ATACADAO_SITE: /(^|\.)vtexassets\.com$/,
+  MATEUS_MAIS_SITE: /^ik\.imagekit\.io$/,
+};
+
+/**
+ * Só aceita foto HTTPS hospedada no CDN oficial da fonte que informou o GTIN.
+ * Qualquer outra coisa vira null — melhor ficar sem foto do que com a foto errada.
+ */
+export function trustedImageUrl(source: PriceSource, raw: unknown): string | null {
+  if (typeof raw !== 'string' || raw.length > 600) return null;
+  const allowed = IMAGE_HOSTS[source];
+  if (!allowed) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === 'https:' && allowed.test(url.hostname) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Confere nome, marca, embalagem, GTIN, preço, filial e quantidade mínima.
@@ -154,6 +178,7 @@ export function validateOffer(raw: RawOffer): Validation {
       source: raw.source,
       collectedAt: collected.toISOString(),
       externalSku: String(raw.externalSku ?? ''),
+      imageUrl: trustedImageUrl(raw.source, raw.imageUrl),
     },
   };
 }

@@ -534,6 +534,23 @@ export async function persistCollectedOffers(
     }
   }
 
+  // Fotos oficiais: uma por GTIN e fonte, sempre ligadas ao código de barras informado
+  // pela própria rede (tabela produto_imagens). Falha aqui não invalida os preços gravados.
+  try {
+    const images = new Map<string, PersistItem>();
+    for (const item of accepted) if (item.imageUrl) images.set(`${item.gtin}|${item.source}`, item);
+    const rows = [...images.values()];
+    for (let start = 0; start < rows.length; start += 500) {
+      await pool.query(
+        `INSERT INTO produto_imagens(gtin,url,fonte,pagina_origem,coletada_em) VALUES ?
+         ON DUPLICATE KEY UPDATE url=VALUES(url), pagina_origem=VALUES(pagina_origem), coletada_em=VALUES(coletada_em)`,
+        [rows.slice(start, start + 500).map((i) => [i.gtin, i.imageUrl, i.source, i.sourceUrl, mysqlUTC(i.collectedAt)])]
+      );
+    }
+  } catch (err) {
+    options.log?.warn(`[Imagens] fotos não gravadas nesta execução: ${(err as Error).message}`);
+  }
+
   // 4) Preços online por UF, com a fonte verdadeira (nunca "Data Market" para dado do site)
   if (options.online !== false) {
     const quotes: OnlineQuote[] = accepted
@@ -898,7 +915,14 @@ export async function runMarketCollection(options: CollectionOptions = {}): Prom
     return [];
   }
   collecting = true;
+  // Trava no MySQL: vale também entre processos (API + worker, ou dois workers por engano).
+  const lock = await pool.getConnection();
   try {
+    const [held] = await lock.query<RowDataPacket[]>("SELECT GET_LOCK(CONCAT(DATABASE(), '_coleta'), 0) AS ok");
+    if (Number(held[0]?.ok) !== 1) {
+      log?.warn('[Coleta] outro processo já está coletando; esta chamada foi ignorada.');
+      return [];
+    }
     const enabled: RunSummary['source'][] = [];
     if (process.env.LIVE_SCRAPE_ENABLED !== 'false') {
       if (process.env.ATACADAO_SYNC_ENABLED !== 'false') enabled.push('ATACADAO_SITE');
@@ -927,6 +951,8 @@ export async function runMarketCollection(options: CollectionOptions = {}): Prom
     }
     return runs;
   } finally {
+    await lock.query("SELECT RELEASE_LOCK(CONCAT(DATABASE(), '_coleta'))").catch(() => undefined);
+    lock.release();
     collecting = false;
   }
 }
@@ -973,7 +999,7 @@ async function runDataMarket(log: Logger): Promise<void> {
  *  - Reiniciar o servidor (npm run dev) não dispara nova varredura se a última
  *    coleta completa ainda está dentro do intervalo.
  */
-export function startMarketScheduler(log: Logger): void {
+export function startMarketScheduler(log: Logger, options: { keepAlive?: boolean } = {}): void {
   const hours = Math.max(1, Number(process.env.PRICE_COLLECT_INTERVAL_HOURS) || 12);
   const cycle = async () => {
     try {
@@ -989,6 +1015,8 @@ export function startMarketScheduler(log: Logger): void {
     }
   };
   void cycle();
-  setInterval(() => void cycle(), hours * 3_600_000).unref();
+  const timer = setInterval(() => void cycle(), hours * 3_600_000);
+  // Na API o agendador não segura o processo; no worker ele é o próprio processo.
+  if (!options.keepAlive) timer.unref();
   log.info(`[Coleta] agendada a cada ${hours} h. Atacadão: ${process.env.ATACADAO_SYNC_ENABLED !== 'false' && process.env.LIVE_SCRAPE_ENABLED !== 'false' ? 'ligado' : 'desligado'}; Mateus Mais: ${process.env.MATEUS_SYNC_ENABLED === 'true' ? 'ligado' : 'desligado (Termos de Uso)'}.`);
 }

@@ -88,6 +88,7 @@ export type MateusProduct = {
   /** Vendido por peso/a granel: o preço não é de uma embalagem comparável. */
   bulk: boolean;
   forSale: boolean;
+  imageUrl: string | null;
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -200,6 +201,7 @@ export function parseMateusProduct(raw: unknown): MateusProduct | null {
     minimumQuantity: item.sale_in_multiple === true && Number.isSafeInteger(multiple) && multiple > 1 ? multiple : 1,
     bulk: item.is_bulk === true,
     forSale: item.for_sale !== false && item.is_active !== false,
+    imageUrl: typeof item.image === 'string' ? item.image : null,
   };
 }
 
@@ -269,6 +271,7 @@ export function mateusOffer(product: MateusProduct, market: MateusMarket, collec
     source: 'MATEUS_MAIS_SITE',
     collectedAt,
     externalSku: product.sku,
+    imageUrl: product.imageUrl,
   });
 }
 

@@ -51,6 +51,7 @@ export type AtacadaoItem = {
   brand: string;
   slug: string;
   internalCode: string;
+  imageUrl: string | null;
   tiers: AtacadaoTier[];
 };
 export type EanInfo = { ean: string | null; name: string };
@@ -132,6 +133,7 @@ export function buildProductsQueryUrl(
 
 type GraphqlOffer = { price?: unknown; listPrice?: unknown; minQuantity?: unknown; seller?: { identifier?: unknown } };
 type GraphqlNode = {
+  image?: { url?: unknown }[];
   sku?: unknown;
   name?: unknown;
   slug?: unknown;
@@ -179,6 +181,7 @@ export function parseAtacadaoProductsPage(
       brand: String(node.brand?.name ?? node.brand?.brandName ?? '').trim(),
       slug: String(node.slug ?? '').trim(),
       internalCode: String(node.gtin ?? '').trim(),
+      imageUrl: typeof node.image?.[0]?.url === 'string' ? node.image[0].url : null,
       tiers,
     });
   }
@@ -377,6 +380,7 @@ export async function collectAtacadao(options: {
         source: 'ATACADAO_SITE',
         collectedAt: item.collectedAt,
         externalSku: item.sku,
+        imageUrl: item.imageUrl,
       });
       if (!checked.ok) {
         failure = checked.reason;
