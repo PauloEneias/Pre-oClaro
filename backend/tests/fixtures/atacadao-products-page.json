@@ -1,0 +1,1234 @@
+{
+ "data": {
+  "search": {
+   "searchId": "339e543658ee4dbea7324cddc5b598fe",
+   "products": {
+    "pageInfo": {
+     "totalCount": 927
+    },
+    "edges": [
+     {
+      "node": {
+       "id": "27439",
+       "slug": "creme-de-leite-piracanjuba-23290-27439",
+       "sku": "27439",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Piracanjuba",
+        "name": "Piracanjuba"
+       },
+       "name": "Creme de Leite Piracanjuba 200g",
+       "gtin": "23290909",
+       "isVariantOf": {
+        "productGroupID": "27439",
+        "name": "Creme de Leite Piracanjuba 200g"
+       },
+       "offers": {
+        "highPrice": 3.59,
+        "lowPrice": 3.59,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 3.59,
+          "listPrice": 3.59,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 27,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "36708",
+       "slug": "detergente-liquido-ype-clear-22392-36708",
+       "sku": "36708",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Ypê",
+        "name": "Ypê"
+       },
+       "name": "Detergente Líquido Ypê Clear 500ml",
+       "gtin": "22392927",
+       "isVariantOf": {
+        "productGroupID": "36708",
+        "name": "Detergente Líquido Ypê Clear 500ml"
+       },
+       "offers": {
+        "highPrice": 3.49,
+        "lowPrice": 2.99,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 3.49,
+          "listPrice": 3.49,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 24,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 2.99,
+          "listPrice": 2.99,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 24,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "35394",
+       "slug": "chocolate-lacta-favoritos-63326-35394",
+       "sku": "35394",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Lacta",
+        "name": "Lacta"
+       },
+       "name": "Caixa de Variedades Lacta Favoritos 250,6g",
+       "gtin": "63326911",
+       "isVariantOf": {
+        "productGroupID": "35394",
+        "name": "Caixa de Variedades Lacta Favoritos 250,6g"
+       },
+       "offers": {
+        "highPrice": 21.49,
+        "lowPrice": 20.49,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 21.49,
+          "listPrice": 21.49,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 30,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 20.49,
+          "listPrice": 20.49,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 30,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "16349",
+       "slug": "oleo-de-soja-soya-11300-16349",
+       "sku": "16349",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Soya",
+        "name": "Soya"
+       },
+       "name": "Óleo de Soja Soya 900ml",
+       "gtin": "11300984",
+       "isVariantOf": {
+        "productGroupID": "16349",
+        "name": "Óleo de Soja Soya 900ml"
+       },
+       "offers": {
+        "highPrice": 8.39,
+        "lowPrice": 8.19,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 8.39,
+          "listPrice": 8.39,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 8.19,
+          "listPrice": 8.19,
+          "quantity": 1,
+          "minQuantity": 5,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "9925",
+       "slug": "feijao-carioca-kicaldo-tipo-1-pacote-com-1kg-11874-9925",
+       "sku": "9925",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Kicaldo",
+        "name": "Kicaldo"
+       },
+       "name": "Feijão Carioca Kicaldo Tipo 1 1kg",
+       "gtin": "11874948",
+       "isVariantOf": {
+        "productGroupID": "9925",
+        "name": "Feijão Carioca Kicaldo Tipo 1 1kg"
+       },
+       "offers": {
+        "highPrice": 7.99,
+        "lowPrice": 7.99,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 7.99,
+          "listPrice": 7.99,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 10,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "23452",
+       "slug": "copo-americano-nadir-ref--2010-unidade-17205-23452",
+       "sku": "23452",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Nadir",
+        "name": "Nadir"
+       },
+       "name": "Copo Americano Nadir Ref. 2010 un",
+       "gtin": "17205984",
+       "isVariantOf": {
+        "productGroupID": "23452",
+        "name": "Copo Americano Nadir Ref. 2010 un"
+       },
+       "offers": {
+        "highPrice": 1.69,
+        "lowPrice": 1.69,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 1.69,
+          "listPrice": 1.69,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 24,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "30600",
+       "slug": "leite-condensado-moca-integral-18842-30600",
+       "sku": "30600",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Moça",
+        "name": "Moça"
+       },
+       "name": "Leite Condensado Moça Integral 395g",
+       "gtin": "18842981",
+       "isVariantOf": {
+        "productGroupID": "30600",
+        "name": "Leite Condensado Moça Integral 395g"
+       },
+       "offers": {
+        "highPrice": 12.98,
+        "lowPrice": 12.49,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 12.98,
+          "listPrice": 12.98,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 48,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 12.49,
+          "listPrice": 12.49,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 48,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "13410",
+       "slug": "sal-lebre-refinado-8528-13410",
+       "sku": "13410",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Lebre",
+        "name": "Lebre"
+       },
+       "name": "Sal Lebre Refinado 1kg",
+       "gtin": "8528908",
+       "isVariantOf": {
+        "productGroupID": "13410",
+        "name": "Sal Lebre Refinado 1kg"
+       },
+       "offers": {
+        "highPrice": 2.49,
+        "lowPrice": 2.09,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 2.49,
+          "listPrice": 2.49,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 10,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 2.09,
+          "listPrice": 2.09,
+          "quantity": 1,
+          "minQuantity": 10,
+          "unitPerBox": 10,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "3301",
+       "slug": "macarrao-instantaneo-nissin-lamen-galinha-caipira-5614-3301",
+       "sku": "3301",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Nissin",
+        "name": "Nissin"
+       },
+       "name": "Macarrão Instantâneo Nissin Lámen Galinha caipira 85g",
+       "gtin": "5614990",
+       "isVariantOf": {
+        "productGroupID": "3301",
+        "name": "Macarrão Instantâneo Nissin Lámen Galinha caipira 85g"
+       },
+       "offers": {
+        "highPrice": 2.39,
+        "lowPrice": 2.29,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 2.39,
+          "listPrice": 2.39,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 50,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 2.29,
+          "listPrice": 2.29,
+          "quantity": 1,
+          "minQuantity": 5,
+          "unitPerBox": 50,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "13743",
+       "slug": "arroz-branco-camil-tipo-1-12658-13743",
+       "sku": "13743",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Camil",
+        "name": "Camil"
+       },
+       "name": "Arroz Branco Camil Tipo 1 5kg",
+       "gtin": "12658945",
+       "isVariantOf": {
+        "productGroupID": "13743",
+        "name": "Arroz Branco Camil Tipo 1 5kg"
+       },
+       "offers": {
+        "highPrice": 27.95,
+        "lowPrice": 26.95,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 27.95,
+          "listPrice": 27.95,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 6,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 26.95,
+          "listPrice": 26.95,
+          "quantity": 1,
+          "minQuantity": 6,
+          "unitPerBox": 6,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "16886",
+       "slug": "oleo-soya-girassol-60621-16886",
+       "sku": "16886",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Soya",
+        "name": "Soya"
+       },
+       "name": "Óleo de Girassol Soya 900ml",
+       "gtin": "60621974",
+       "isVariantOf": {
+        "productGroupID": "16886",
+        "name": "Óleo de Girassol Soya 900ml"
+       },
+       "offers": {
+        "highPrice": 15.49,
+        "lowPrice": 14.99,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 15.49,
+          "listPrice": 15.49,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 14.99,
+          "listPrice": 14.99,
+          "quantity": 1,
+          "minQuantity": 4,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "13462",
+       "slug": "flocao-de-milho-marata-41518-13462",
+       "sku": "13462",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Maratá",
+        "name": "Maratá"
+       },
+       "name": "Flocão de Milho Maratá 500g",
+       "gtin": "41518940",
+       "isVariantOf": {
+        "productGroupID": "13462",
+        "name": "Flocão de Milho Maratá 500g"
+       },
+       "offers": {
+        "highPrice": 2.19,
+        "lowPrice": 1.99,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 2.19,
+          "listPrice": 2.19,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 1.99,
+          "listPrice": 1.99,
+          "quantity": 1,
+          "minQuantity": 2,
+          "unitPerBox": 20,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "17423",
+       "slug": "chocolate-kit-kat-nestle-ao-leite-57912-17423",
+       "sku": "17423",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Kit Kat",
+        "name": "Kit Kat"
+       },
+       "name": "Chocolate Kit Kat Nestlé Ao Leite 41,5g",
+       "gtin": "57912935",
+       "isVariantOf": {
+        "productGroupID": "17423",
+        "name": "Chocolate Kit Kat Nestlé Ao Leite 41,5g"
+       },
+       "offers": {
+        "highPrice": 5.99,
+        "lowPrice": 5.49,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 5.99,
+          "listPrice": 5.99,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 96,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 5.49,
+          "listPrice": 5.49,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 96,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "16327",
+       "slug": "azeite-de-oliva-andorinha-extra-virgem-23113-16327",
+       "sku": "16327",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Andorinha",
+        "name": "Andorinha"
+       },
+       "name": "Azeite de Oliva Andorinha Extra Virgem 500ml",
+       "gtin": "23113977",
+       "isVariantOf": {
+        "productGroupID": "16327",
+        "name": "Azeite de Oliva Andorinha Extra Virgem 500ml"
+       },
+       "offers": {
+        "highPrice": 41.9,
+        "lowPrice": 39.9,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 41.9,
+          "listPrice": 41.9,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 12,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 39.9,
+          "listPrice": 39.9,
+          "quantity": 1,
+          "minQuantity": 2,
+          "unitPerBox": 12,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "13073",
+       "slug": "filtro-de-papel-para-cafe-melitta-nº-103-16297-13073",
+       "sku": "13073",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Melitta",
+        "name": "Melitta"
+       },
+       "name": "Filtro de Papel para Café Melitta Nº 103 30 un",
+       "gtin": "16297926",
+       "isVariantOf": {
+        "productGroupID": "13073",
+        "name": "Filtro de Papel para Café Melitta Nº 103 30 un"
+       },
+       "offers": {
+        "highPrice": 4.99,
+        "lowPrice": 4.69,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 4.99,
+          "listPrice": 4.99,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 48,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 4.69,
+          "listPrice": 4.69,
+          "quantity": 1,
+          "minQuantity": 4,
+          "unitPerBox": 48,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "6283",
+       "slug": "margarina-qualy-com-sal-35265-6283",
+       "sku": "6283",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Qualy",
+        "name": "Qualy"
+       },
+       "name": "Margarina Qualy Com sal 500g",
+       "gtin": "35265973",
+       "isVariantOf": {
+        "productGroupID": "6283",
+        "name": "Margarina Qualy Com sal 500g"
+       },
+       "offers": {
+        "highPrice": 10.9,
+        "lowPrice": 10.49,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 10.9,
+          "listPrice": 10.9,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 12,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 10.49,
+          "listPrice": 10.49,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 12,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "12460",
+       "slug": "cerveja-heineken-lata-com-269ml-76983-12460",
+       "sku": "12460",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Heineken",
+        "name": "Heineken"
+       },
+       "name": "Cerveja Heineken 269ml",
+       "gtin": "76983942",
+       "isVariantOf": {
+        "productGroupID": "12460",
+        "name": "Cerveja Heineken 269ml"
+       },
+       "offers": {
+        "highPrice": 4.99,
+        "lowPrice": 4.79,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 4.99,
+          "listPrice": 4.99,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 8,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 4.79,
+          "listPrice": 4.79,
+          "quantity": 1,
+          "minQuantity": 8,
+          "unitPerBox": 8,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "28583",
+       "slug": "la-de-aco-assolan-77021-28583",
+       "sku": "28583",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Assolan",
+        "name": "Assolan"
+       },
+       "name": "Lã de Aço Assolan com 8 unidades 45g",
+       "gtin": "77021943",
+       "isVariantOf": {
+        "productGroupID": "28583",
+        "name": "Lã de Aço Assolan com 8 unidades 45g"
+       },
+       "offers": {
+        "highPrice": 1.69,
+        "lowPrice": 1.49,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 1.69,
+          "listPrice": 1.69,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 200,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 1.49,
+          "listPrice": 1.49,
+          "quantity": 1,
+          "minQuantity": 4,
+          "unitPerBox": 200,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "31415",
+       "slug": "leite-em-po-ninho-integral-71724-31415",
+       "sku": "31415",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Ninho",
+        "name": "Ninho"
+       },
+       "name": "Leite em Pó Ninho Integral 380g",
+       "gtin": "71724960",
+       "isVariantOf": {
+        "productGroupID": "31415",
+        "name": "Leite em Pó Ninho Integral 380g"
+       },
+       "offers": {
+        "highPrice": 22.98,
+        "lowPrice": 21.99,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 22.98,
+          "listPrice": 22.98,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 24,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         },
+         {
+          "price": 21.99,
+          "listPrice": 21.99,
+          "quantity": 1,
+          "minQuantity": 3,
+          "unitPerBox": 24,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     },
+     {
+      "node": {
+       "id": "32845",
+       "slug": "leite-longa-vida-piracanjuba-com-tampa-semidesnatado-58046-32845",
+       "sku": "32845",
+       "measurementUnit": "un",
+       "unitMultiplier": 1,
+       "properties": [
+        {
+         "originalName": "sellerId",
+         "name": "sellerId",
+         "values": [
+          "1"
+         ]
+        }
+       ],
+       "brand": {
+        "brandName": "Piracanjuba",
+        "name": "Piracanjuba"
+       },
+       "name": "Leite Longa Vida Piracanjuba Com tampa Semidesnatado 1L",
+       "gtin": "58046997",
+       "isVariantOf": {
+        "productGroupID": "32845",
+        "name": "Leite Longa Vida Piracanjuba Com tampa Semidesnatado 1L"
+       },
+       "offers": {
+        "highPrice": 5.75,
+        "lowPrice": 5.75,
+        "precoExclusivoEcom": false,
+        "offers": [
+         {
+          "price": 5.75,
+          "listPrice": 5.75,
+          "quantity": 1,
+          "minQuantity": 1,
+          "unitPerBox": 12,
+          "seller": {
+           "identifier": "atacadaobr747"
+          }
+         }
+        ]
+       },
+       "sellers": [
+        {
+         "commertialOffer": {
+          "discountHighlights": []
+         }
+        }
+       ],
+       "additionalProperty": []
+      }
+     }
+    ]
+   }
+  }
+ }
+}

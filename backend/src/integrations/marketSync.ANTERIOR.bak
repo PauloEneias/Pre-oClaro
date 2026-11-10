@@ -1,0 +1,77 @@
+import type {ResultSetHeader, RowDataPacket} from 'mysql2';
+import {pool} from '../db.js';
+import {fetchMarketQuotes, type OnlineQuote} from './dataMarket.js';
+import {gtinValid} from '../csv.js';
+
+export function mysqlUTC(date: string): string {
+  return new Date(date).toISOString().slice(0, 19).replace('T', ' ');
+}
+
+type Current = RowDataPacket & {observado_em: Date};
+
+export async function saveOnlineQuotes(quotes: OnlineQuote[]): Promise<number> {
+  if (!quotes.length) return 0;
+  const conn = await pool.getConnection();
+  let saved = 0;
+  try {
+    await conn.beginTransaction();
+    for (const q of quotes) {
+      const observedAt = mysqlUTC(q.observedAt);
+      const [current] = await conn.execute<Current[]>(
+        `SELECT observado_em FROM precos_online
+         WHERE gtin=? AND estabelecimento=? AND uf=? AND canal=? AND fonte=? FOR UPDATE`,
+        [q.gtin, q.storeName, q.state, q.channel, q.source]
+      );
+      const old = current[0]?.observado_em;
+      if (old && new Date(old).getTime() >= new Date(q.observedAt).getTime()) continue;
+      await conn.execute<ResultSetHeader>(
+        `INSERT INTO precos_online
+         (gtin,produto_nome,rede,estabelecimento,uf,canal,preco,disponivel,fonte,observado_em)
+         VALUES (?,?,?,?,?,?,?,?,?,?)
+         ON DUPLICATE KEY UPDATE produto_nome=VALUES(produto_nome),rede=VALUES(rede),
+           preco=VALUES(preco),disponivel=VALUES(disponivel),observado_em=VALUES(observado_em),sincronizado_em=NOW()`,
+        [q.gtin,q.productName,q.network,q.storeName,q.state,q.channel,q.price,true,q.source,observedAt]
+      );
+      await conn.execute<ResultSetHeader>(
+        `INSERT INTO historico_precos_online
+         (gtin,estabelecimento,uf,canal,preco,fonte,observado_em)
+         VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE id=id`,
+        [q.gtin,q.storeName,q.state,q.channel,q.price,q.source,observedAt]
+      );
+      saved++;
+    }
+    await conn.commit();
+    return saved;
+  } catch(e) { await conn.rollback(); throw e; }
+  finally {conn.release();}
+}
+
+export async function syncMarketGtin(gtin: string): Promise<{matched:number; updated:number}> {
+  if (!gtinValid(gtin)) throw new Error(`GTIN inválido: ${gtin}`);
+  const apiKey=process.env.DATA_MARKET_API_KEY?.trim() || '';
+  const quotes=await fetchMarketQuotes(gtin,apiKey,'MA');
+  return {matched:quotes.length,updated:await saveOnlineQuotes(quotes)};
+}
+
+/** Agenda atualização diária apenas com consentimento explícito no .env.
+ * Evita uma consulta por visita; não executa se não houver chave ou GTINs.
+ */
+export function startMarketScheduler(log: {info: (...args:unknown[])=>void;warn:(...args:unknown[])=>void}) {
+  if(process.env.MARKET_SYNC_ENABLED!=='true')return;
+  const eans=(process.env.MARKET_SYNC_EANS||'').split(',').map(x=>x.trim()).filter(gtinValid);
+  if(!process.env.DATA_MARKET_API_KEY || !eans.length){
+    log.warn('Sincronização de preços desativada: configure DATA_MARKET_API_KEY e MARKET_SYNC_EANS.');
+    return;
+  }
+  const hours=Math.max(24,Number(process.env.MARKET_SYNC_INTERVAL_HOURS)||24);
+  const update=async()=>{
+    for(const gtin of eans.slice(0,10)){
+      try{
+        const result=await syncMarketGtin(gtin);
+        log.info(`Data Market GTIN ${gtin}: ${result.matched} ofertas MA elegíveis, ${result.updated} atualizadas.`);
+      }catch(e){log.warn(`Data Market ${gtin}: ${(e as Error).message}`);}
+    }
+  };
+  void update();
+  setInterval(()=>void update(),hours*60*60*1000).unref();
+}

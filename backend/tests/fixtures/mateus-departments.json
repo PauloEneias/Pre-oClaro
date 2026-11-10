@@ -1,0 +1,110 @@
+{
+ "use_section_as_department": false,
+ "departaments": [
+  {
+   "id": "ofertas",
+   "name": "Ofertas",
+   "sections": [
+    {
+     "id": "ofertas",
+     "name": "Ofertas",
+     "categories": []
+    }
+   ]
+  },
+  {
+   "id": "8923021c-063b-422d-9e3a-d316b9741049",
+   "name": "Mercearia",
+   "sections": [
+    {
+     "id": "ca778bb4-8c72-43b3-8db0-1ac5d34430e2",
+     "name": "Alimentos Básicos",
+     "categories": [
+      {
+       "id": "0e91150f-abdd-43ef-9015-e4b5d47104a4",
+       "name": "Café Solúvel"
+      },
+      {
+       "id": "2aab3f57-6c8a-4a93-9df3-ea05941d114b",
+       "name": "Açúcar"
+      },
+      {
+       "id": "49a61837-a746-4236-9f71-798236562eb9",
+       "name": "Óleo Especial"
+      }
+     ]
+    },
+    {
+     "id": "629c1681-e67f-47a0-9289-95aa605befea",
+     "name": "Biscoitos",
+     "categories": [
+      {
+       "id": "02ec8db1-f2a7-4aa8-b164-564a71611595",
+       "name": "Salgadinhos & Aperitivos Food"
+      },
+      {
+       "id": "0b6ae990-75b8-4255-8aab-a83259817ae5",
+       "name": "Snack - Trigo"
+      },
+      {
+       "id": "0c705bbf-cb77-40fa-a3d4-333ae3c20c74",
+       "name": "Biscoitos Caseiros"
+      }
+     ]
+    },
+    {
+     "id": "51127cfc-df39-47d5-8647-bc3eb8c81bfe",
+     "name": "Bomboniere",
+     "categories": [
+      {
+       "id": "0b6ae990-75b8-4255-8aab-a83259817ae5",
+       "name": "Snack - Trigo"
+      },
+      {
+       "id": "12280c5f-ca40-49fd-9e9b-fe1e0b03a804",
+       "name": "Chocolates em Barra"
+      },
+      {
+       "id": "2b80ab4d-fe3b-418d-bb98-beaa2851224e",
+       "name": "Snack - Batata Chips"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "07ec889f-18b8-4a99-83c6-eacf1741e01c",
+   "name": "Ovos",
+   "sections": [
+    {
+     "id": "bd32f844-fc24-4e85-bda6-8bb2c7f1e748",
+     "name": "Ovos Embalados",
+     "categories": [
+      {
+       "id": "1b2aa208-680a-41dc-8c4e-d283afb5048d",
+       "name": "Ovos Brancos c/12"
+      },
+      {
+       "id": "23e02725-7568-47f2-b01e-112656aa2328",
+       "name": "Ovos Especiais"
+      },
+      {
+       "id": "49a2bee6-26c8-4e0a-9469-96eec5a88fa2",
+       "name": "Ovos de Codorna c/30"
+      }
+     ]
+    },
+    {
+     "id": "53817f4d-0505-441b-b06c-cf79f5768eee",
+     "name": "Ovos Pasteurizados",
+     "categories": [
+      {
+       "id": "087d1285-121c-46df-9a5b-aed49027ba0e",
+       "name": "Ovos Pasteurizadas"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

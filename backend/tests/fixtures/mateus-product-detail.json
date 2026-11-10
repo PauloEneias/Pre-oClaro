@@ -1,0 +1,25 @@
+{
+ "objectID": "97c1d6a5-ad52-4c8e-a649-cc809d6280ec",
+ "brand": "CAMIL",
+ "name": "Feijão Preto Camil Tipo 1 1kg",
+ "barcode": "7896006751113",
+ "sku": 98239,
+ "price": 9.39,
+ "low_price": 6.99,
+ "sale_price": 6.99,
+ "wholesale_price": null,
+ "wholesale_sale_price": null,
+ "market_id": "2857c51e-ffc9-4365-b39a-0156cfc032b9",
+ "market_name": "Supermercado Mateus Cohama",
+ "measure": 1.0,
+ "measure_type": "KG",
+ "for_sale": true,
+ "is_active": true,
+ "_geoloc": {
+  "lat": -2.5157923,
+  "lng": -44.2452414
+ },
+ "updated_at": "2026-11-10 00:53:17.859442+00:00",
+ "departament_id": "8923021c-063b-422d-9e3a-d316b9741049",
+ "departament_name": "Mercearia"
+}

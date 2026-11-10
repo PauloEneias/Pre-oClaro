@@ -1,0 +1,27 @@
+{
+ "id": "f7a3a08f-12bf-4507-ae1b-81d8c02790cf",
+ "objectID": "f7a3a08f-12bf-4507-ae1b-81d8c02790cf",
+ "company_name": "Mateus Food Express - São Luís",
+ "slug": "mateusfoodservice",
+ "full_address": "Av. Cel Colares Moreira, 80 - Renascença, São Luís - MA, 65075-441",
+ "city_name": "São Luís",
+ "city_code": "2111300",
+ "state_uf": "MA",
+ "state_name": "Maranhão",
+ "disabled": false,
+ "not_list_market": false,
+ "product_markets": [
+  "f7a3a08f-12bf-4507-ae1b-81d8c02790cf",
+  "f7a3a08f-12bf-4507-ae1b-81d8c02790cf"
+ ],
+ "latitude": null,
+ "longitude": null,
+ "location": {
+  "lat": -2.4989725,
+  "lng": -44.2398345
+ },
+ "_geoloc": {
+  "lat": -2.4989725,
+  "lng": -44.2398345
+ }
+}

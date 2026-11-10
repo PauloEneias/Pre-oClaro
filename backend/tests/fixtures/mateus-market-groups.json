@@ -1,0 +1,229 @@
+[
+ {
+  "category_group_id": "258f2127-933b-4e51-a1d8-89f7d4cbd36e",
+  "name": "Mercado",
+  "image": "",
+  "order": 0,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "2857c51e-ffc9-4365-b39a-0156cfc032b9",
+    "name": "Supermercado Mateus Cohama",
+    "slug": "supermercado-mateus-cohama",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/storemateus_stateopened.webp?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 0.0,
+    "product_markets": [
+     "2857c51e-ffc9-4365-b39a-0156cfc032b9"
+    ],
+    "external_code": 7,
+    "not_list_all": false
+   },
+   {
+    "id": "14ae828b-491f-42fc-8247-5089f6613750",
+    "name": "Mateus Mais Express⚡️",
+    "slug": "super-mateus-express",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/icon-loja-mmexpress.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 6.27,
+    "product_markets": [
+     "14ae828b-491f-42fc-8247-5089f6613750"
+    ],
+    "external_code": 350,
+    "not_list_all": false
+   },
+   {
+    "id": "78b01f0d-8954-495a-a4c0-817618f41eb2",
+    "name": "Mix Mateus Vinhais",
+    "slug": "mix-mateus-vinhais",
+    "is_salesforce_flow": true,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/mix.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 1.42,
+    "product_markets": [
+     "78b01f0d-8954-495a-a4c0-817618f41eb2"
+    ],
+    "external_code": 20,
+    "not_list_all": false
+   },
+   {
+    "id": "966edfff-4c07-4d7c-a73b-38dfca4e224e",
+    "name": "Supermercado Mateus Calhau",
+    "slug": "supermercado-mateus-calhau",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/hiper.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 2.99,
+    "product_markets": [
+     "966edfff-4c07-4d7c-a73b-38dfca4e224e"
+    ],
+    "external_code": 16,
+    "not_list_all": false
+   }
+  ]
+ },
+ {
+  "category_group_id": "517de381-ab8c-49b0-b1ab-3cc720a334a2",
+  "name": "Eletro",
+  "image": "",
+  "order": 1,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "246a27e0-f102-48b7-8c05-0d3690e46dba",
+    "name": "Eletro Mateus Cohama - Retirada",
+    "slug": "eletro-mateus-cohama-retirada",
+    "is_salesforce_flow": false,
+    "image": "",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": true,
+    "distance": 0.17,
+    "product_markets": [
+     "246a27e0-f102-48b7-8c05-0d3690e46dba"
+    ],
+    "external_code": 7,
+    "not_list_all": false
+   }
+  ]
+ },
+ {
+  "category_group_id": "0edb752a-64d0-45e5-a1db-bab4b35a5ac9",
+  "name": "Food Service",
+  "image": "",
+  "order": 2,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "f7a3a08f-12bf-4507-ae1b-81d8c02790cf",
+    "name": "Mateus Food Express - São Luís",
+    "slug": "mateusfoodservice",
+    "is_salesforce_flow": true,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/avatar-mateusfood.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 1.96,
+    "product_markets": [
+     "f7a3a08f-12bf-4507-ae1b-81d8c02790cf",
+     "f7a3a08f-12bf-4507-ae1b-81d8c02790cf"
+    ],
+    "external_code": 350,
+    "not_list_all": true
+   }
+  ]
+ },
+ {
+  "category_group_id": "71b8df85-c37b-43d7-8eb8-0819e041729d",
+  "name": "Spazio",
+  "image": "",
+  "order": 4,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "4d2a874d-ba7f-4f7e-bc1b-31ac43e80226",
+    "name": "Spazio Mateus São Luís Shopping",
+    "slug": "spazio-mateus-sao-luis-shopping",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/Prancheta_4.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 4.29,
+    "product_markets": [
+     "4d2a874d-ba7f-4f7e-bc1b-31ac43e80226"
+    ],
+    "external_code": 229,
+    "not_list_all": false
+   }
+  ]
+ },
+ {
+  "category_group_id": "26de9f72-e15a-4bb6-af5d-b37f818262bc",
+  "name": "Farma",
+  "image": "",
+  "order": 5,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "aecc010b-a588-4fcb-8b1d-1a22062aea67",
+    "name": "Mix Toureiro Farma",
+    "slug": "mix-toureiro-farma",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/logoToureiroFarma.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 4.26,
+    "product_markets": [
+     "aecc010b-a588-4fcb-8b1d-1a22062aea67"
+    ],
+    "external_code": 5081,
+    "not_list_all": false
+   }
+  ]
+ },
+ {
+  "category_group_id": "198ffc2a-cb3b-42ce-9ccb-581f7523d45a",
+  "name": "Mais Fraldas",
+  "image": "",
+  "order": 6,
+  "city_name": "São Luís",
+  "city_code": "2111300",
+  "type": "proximity",
+  "markets": [
+   {
+    "id": "6927aeda-cbd2-4ac4-b858-7e0b5bba0da8",
+    "name": "Mais Fraldas Cohama",
+    "slug": "mais-fraldas-aririzal",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/aririzal_icon.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 0.63,
+    "product_markets": [
+     "6927aeda-cbd2-4ac4-b858-7e0b5bba0da8"
+    ],
+    "external_code": 1428,
+    "not_list_all": false
+   },
+   {
+    "id": "8c890986-ad2c-4463-b4ea-9953121a855a",
+    "name": "Mais Fraldas Cohatrac",
+    "slug": "mais-fraldas-mac-center",
+    "is_salesforce_flow": false,
+    "image": "https://ik.imagekit.io/glm5kjz1tud/products/market-image/COHATRAC_1.png?tr=w-600",
+    "online_sell": true,
+    "is_favorite": false,
+    "is_marketplace": false,
+    "distance": 1.0,
+    "product_markets": [
+     "8c890986-ad2c-4463-b4ea-9953121a855a"
+    ],
+    "external_code": 1412,
+    "not_list_all": false
+   }
+  ]
+ }
+]

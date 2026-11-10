@@ -1,0 +1,382 @@
+[
+ {
+  "productId": "17423",
+  "productName": "Chocolate Kit Kat Nestlé Ao Leite 41,5g",
+  "brand": "Kit Kat",
+  "items": [
+   {
+    "itemId": "17423",
+    "name": "Chocolate Kit Kat Nestlé Ao Leite 41,5g",
+    "nameComplete": "Chocolate Kit Kat Nestlé Ao Leite 41,5g",
+    "ean": "7891000248768",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "57912935"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "12460",
+  "productName": "Cerveja Heineken 269ml",
+  "brand": "Heineken",
+  "items": [
+   {
+    "itemId": "12460",
+    "name": "Cerveja Heineken 269ml",
+    "nameComplete": "Cerveja Heineken 269ml",
+    "ean": "7896045506590",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "76983942"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "27439",
+  "productName": "Creme de Leite Piracanjuba 200g",
+  "brand": "Piracanjuba",
+  "items": [
+   {
+    "itemId": "27439",
+    "name": "Creme de Leite Piracanjuba 200g",
+    "nameComplete": "Creme de Leite Piracanjuba 200g",
+    "ean": "7898215151784",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "23290909"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "16349",
+  "productName": "Óleo de Soja Soya 900ml",
+  "brand": "Soya",
+  "items": [
+   {
+    "itemId": "16349",
+    "name": "Óleo de Soja Soya 900ml",
+    "nameComplete": "Óleo de Soja Soya 900ml",
+    "ean": "7891107101621",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "11300984"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "36708",
+  "productName": "Detergente Líquido Ypê Clear 500ml",
+  "brand": "Ypê",
+  "items": [
+   {
+    "itemId": "36708",
+    "name": "Detergente Líquido Ypê Clear 500ml",
+    "nameComplete": "Detergente Líquido Ypê Clear 500ml",
+    "ean": "7896098900253",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "22392927"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "23452",
+  "productName": "Copo Americano Nadir Ref. 2010 un",
+  "brand": "Nadir",
+  "items": [
+   {
+    "itemId": "23452",
+    "name": "Copo Americano Nadir Ref. 2010 un",
+    "nameComplete": "Copo Americano Nadir Ref. 2010 un",
+    "ean": "7891155002420",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "17205984"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "13410",
+  "productName": "Sal Lebre Refinado 1kg",
+  "brand": "Lebre",
+  "items": [
+   {
+    "itemId": "13410",
+    "name": "Sal Lebre Refinado 1kg",
+    "nameComplete": "Sal Lebre Refinado 1kg",
+    "ean": "7896110100043",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "8528908"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "9925",
+  "productName": "Feijão Carioca Kicaldo Tipo 1 1kg",
+  "brand": "Kicaldo",
+  "items": [
+   {
+    "itemId": "9925",
+    "name": "Feijão Carioca Kicaldo Tipo 1 1kg",
+    "nameComplete": "Feijão Carioca Kicaldo Tipo 1 1kg",
+    "ean": "7896116900029",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "11874948"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "3301",
+  "productName": "Macarrão Instantâneo Nissin Lámen Galinha caipira 85g",
+  "brand": "Nissin",
+  "items": [
+   {
+    "itemId": "3301",
+    "name": "Macarrão Instantâneo Nissin Lámen Galinha caipira 85g",
+    "nameComplete": "Macarrão Instantâneo Nissin Lámen Galinha caipira 85g",
+    "ean": "7891079000229",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "5614990"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "35394",
+  "productName": "Caixa de Variedades Lacta Favoritos 250,6g",
+  "brand": "Lacta",
+  "items": [
+   {
+    "itemId": "35394",
+    "name": "Caixa de Variedades Lacta Favoritos 250,6g",
+    "nameComplete": "Caixa de Variedades Lacta Favoritos 250,6g",
+    "ean": "7622210596413",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "63326911"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "13743",
+  "productName": "Arroz Branco Camil Tipo 1 5kg",
+  "brand": "Camil",
+  "items": [
+   {
+    "itemId": "13743",
+    "name": "Arroz Branco Camil Tipo 1 5kg",
+    "nameComplete": "Arroz Branco Camil Tipo 1 5kg",
+    "ean": "7896006711155",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "12658945"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "13462",
+  "productName": "Flocão de Milho Maratá 500g",
+  "brand": "Maratá",
+  "items": [
+   {
+    "itemId": "13462",
+    "name": "Flocão de Milho Maratá 500g",
+    "nameComplete": "Flocão de Milho Maratá 500g",
+    "ean": "7898932426042",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "41518940"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "32845",
+  "productName": "Leite Longa Vida Piracanjuba Com tampa Semidesnatado 1L",
+  "brand": "Piracanjuba",
+  "items": [
+   {
+    "itemId": "32845",
+    "name": "Leite Longa Vida Piracanjuba Com tampa Semidesnatado 1L",
+    "nameComplete": "Leite Longa Vida Piracanjuba Com tampa Semidesnatado 1L",
+    "ean": "7898215151760",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "58046997"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "31415",
+  "productName": "Leite em Pó Ninho Integral 380g",
+  "brand": "Ninho",
+  "items": [
+   {
+    "itemId": "31415",
+    "name": "Leite em Pó Ninho Integral 380g",
+    "nameComplete": "Leite em Pó Ninho Integral 380g",
+    "ean": "7891000325858",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "71724960"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "28583",
+  "productName": "Lã de Aço Assolan com 8 unidades 45g",
+  "brand": "Assolan",
+  "items": [
+   {
+    "itemId": "28583",
+    "name": "Lã de Aço Assolan com 8 unidades 45g",
+    "nameComplete": "Lã de Aço Assolan com 8 unidades 45g",
+    "ean": "7896090100101",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "77021943"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "16327",
+  "productName": "Azeite de Oliva Andorinha Extra Virgem 500ml",
+  "brand": "Andorinha",
+  "items": [
+   {
+    "itemId": "16327",
+    "name": "Azeite de Oliva Andorinha Extra Virgem 500ml",
+    "nameComplete": "Azeite de Oliva Andorinha Extra Virgem 500ml",
+    "ean": "5601216120152",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "23113977"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "13073",
+  "productName": "Filtro de Papel para Café Melitta Nº 103 30 un",
+  "brand": "Melitta",
+  "items": [
+   {
+    "itemId": "13073",
+    "name": "Filtro de Papel para Café Melitta Nº 103 30 un",
+    "nameComplete": "Filtro de Papel para Café Melitta Nº 103 30 un",
+    "ean": "7891021001946",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "16297926"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "6283",
+  "productName": "Margarina Qualy Com sal 500g",
+  "brand": "Qualy",
+  "items": [
+   {
+    "itemId": "6283",
+    "name": "Margarina Qualy Com sal 500g",
+    "nameComplete": "Margarina Qualy Com sal 500g",
+    "ean": "7893000394209",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "35265973"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "30600",
+  "productName": "Leite Condensado Moça Integral 395g",
+  "brand": "Moça",
+  "items": [
+   {
+    "itemId": "30600",
+    "name": "Leite Condensado Moça Integral 395g",
+    "nameComplete": "Leite Condensado Moça Integral 395g",
+    "ean": "7891000100103",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "18842981"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "productId": "16886",
+  "productName": "Óleo de Girassol Soya 900ml",
+  "brand": "Soya",
+  "items": [
+   {
+    "itemId": "16886",
+    "name": "Óleo de Girassol Soya 900ml",
+    "nameComplete": "Óleo de Girassol Soya 900ml",
+    "ean": "7891080150463",
+    "referenceId": [
+     {
+      "Key": "RefId",
+      "Value": "60621974"
+     }
+    ]
+   }
+  ]
+ }
+]

@@ -1,0 +1,29 @@
+{
+ "hits": [
+  {
+   "objectID": "6ff0d985-e064-48cf-ac6c-1db74f112e4b",
+   "name": "Chimichurri Picante Puro Tempero 30g",
+   "is_active": true,
+   "price": 4.25,
+   "low_price": 4.09,
+   "sale_price": 4.09,
+   "wholesale_sale_price": null,
+   "brand": "PURO TEMPERO",
+   "sku": 458332,
+   "barcode": "0192505233271",
+   "market_name": "Supermercado Mateus Cohama",
+   "measure_type": "G",
+   "measure": 30,
+   "market_id": "2857c51e-ffc9-4365-b39a-0156cfc032b9",
+   "for_sale": true
+  }
+ ],
+ "query": "",
+ "index": "SHOWCASE_catalog_product_api_index_PROD",
+ "nbHits": 503,
+ "page": 1,
+ "nbPages": 51,
+ "hitsPerPage": 10,
+ "truncated": true,
+ "nbHitsEstimate": 7790
+}

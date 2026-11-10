@@ -1,0 +1,31 @@
+{
+  "name": "precoclaro-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "import:offers": "tsx scripts/import-price-csv.ts",
+    "import:catalog": "tsx scripts/import-official-catalog.ts",
+    "catalog:stats": "tsx scripts/catalog-stats.ts",
+    "sync:market": "tsx scripts/sync-market.ts",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "collect:market": "tsx scripts/collect-market.ts",
+    "test:integration": "node --import tsx --test --test-concurrency=1 tests/integration/*.itest.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.0",
+    "fastify": "^5.0.0",
+    "mysql2": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  }
+}

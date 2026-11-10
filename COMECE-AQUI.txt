@@ -1,0 +1,28 @@
+PREÇOCLARO — ETAPA 2: COMPARAÇÃO NO MYSQL
+
+1) Abra backend/sql/01-schema.sql no MySQL Workbench e execute.
+2) Execute backend/sql/03-localizacao-real.sql.
+3) Execute backend/sql/04-comparacao-historico.sql (NOVO E OBRIGATÓRIO).
+4) Para testes fictícios, execute backend/sql/02-seed-demo.sql (OPCIONAL).
+
+5) TERMINAL 1, NA PASTA PRINCIPAL:
+   cd backend
+   npm install
+   Copy-Item .env.example .env
+   [abra backend/.env e preencha DB_PASSWORD]
+   npm run dev
+
+6) TERMINAL 2, NA PASTA PRINCIPAL:
+   npm install
+   npm run dev
+
+7) Abra http://localhost:5173/comparar?q=arroz
+   Use "Demonstração" para testar a busca e "Ofertas com fonte documentada"
+   para importar os primeiros preços conferidos por você.
+
+8) Para conferir os testes: em backend, execute npm test
+
+9) Leia README.md para a importação CSV, histórico de preços e limitações.
+
+ATENÇÃO: OS PREÇOS DE DEMONSTRAÇÃO NÃO SÃO REAIS.
+A CAPTURA AUTOMÁTICA DE PREÇOS DE SUPERMERCADOS AINDA NÃO ESTÁ PRONTA.

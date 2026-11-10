@@ -1,0 +1,19 @@
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { AlertTriangle, ArrowRight, Camera, CheckCircle2, ReceiptText, X } from 'lucide-react';
+import { brl } from '../data';
+import { products } from './demo';
+
+export default function CheckoutPage(){
+  const [product,setProduct]=useState(String(products[0].id));
+  const [shelf,setShelf]=useState('22.90');
+  const [checkout,setCheckout]=useState('27.90');
+  const [photo,setPhoto]=useState<string | null>(null);
+  const [message,setMessage]=useState(false);
+  const a=Number(shelf),b=Number(checkout),valid=shelf!==''&&checkout!==''&&a>=0&&b>=0&&Number.isFinite(a)&&Number.isFinite(b),diff=b-a;
+  const onFile=(e:ChangeEvent<HTMLInputElement>)=>{const file=e.target.files?.[0];if(!file)return;if(file.size>4*1024*1024){alert('Escolha uma imagem de até 4 MB.');return;}const r=new FileReader();r.onload=()=>setPhoto(String(r.result));r.readAsDataURL(file);};
+  const onSubmit=(e:FormEvent)=>{e.preventDefault();setMessage(true);};
+  return <div className="pc-check-page"><div className="pc-check-heading"><div><span className="pc-kicker">CONFERIR CAIXA</span><h1><em>Confira se o preço</em><br/>do caixa é o mesmo<br/>da prateleira.</h1><p>Registre o valor anunciado e o cobrado para identificar diferenças. As informações desta tela são demonstrações.</p></div><div className="pc-check-decor"><ReceiptText size={95} strokeWidth={1}/></div></div>
+    <div className="pc-check-layout"><form className="pc-form-card" onSubmit={onSubmit}><h2>Conferência de preço</h2><label className="pc-field-label" htmlFor="check-prod"><span className="pc-step">1</span> Produto</label><select className="pc-input" id="check-prod" value={product} onChange={e=>setProduct(e.target.value)}>{products.map(p=><option key={p.id} value={p.id}>{p.name} {p.brand} · {p.size}</option>)}</select><div className="pc-form-two"><label className="pc-field-label"><span className="pc-step">2</span> Preço na prateleira<input className="pc-input" inputMode="decimal" type="number" min="0" step="0.01" value={shelf} onChange={e=>setShelf(e.target.value)} required/></label><label className="pc-field-label"><span className="pc-step">3</span> Preço no caixa<input className="pc-input" inputMode="decimal" type="number" min="0" step="0.01" value={checkout} onChange={e=>setCheckout(e.target.value)} required/></label></div><div className="pc-field-label"><span className="pc-step">4</span> Foto da etiqueta ou comprovante (opcional)</div><label className="pc-upload"><Camera size={26}/><span>Escolher imagem</span><small>JPG ou PNG · até 4 MB · prévia local</small><input type="file" accept="image/jpeg,image/png" onChange={onFile} hidden/></label>{photo&&<div className="pc-upload-preview"><img src={photo} alt="Prévia do arquivo selecionado"/><button type="button" onClick={()=>setPhoto(null)} aria-label="Remover imagem"><X size={17}/></button></div>}<button className="pc-btn pc-full" type="submit">Testar registro <ArrowRight size={18}/></button>{message&&<div className="pc-sandbox-note"><CheckCircle2 size={18}/> Prévia concluída. Nenhum registro foi enviado ou armazenado.</div>}</form>
+      <aside className={`pc-difference ${valid&&diff>0?'is-higher':'is-normal'}`}>{valid?<><div className="pc-difference-icon">{diff>0?<AlertTriangle size={28}/>:<CheckCircle2 size={28}/>}</div><span>{diff>0?'Diferença de preço':diff===0?'Os preços coincidem':'O preço do caixa é menor'}</span><strong>{diff>0?'+':diff<0?'−':''}{brl(Math.abs(diff))}</strong><p>{a>0?`${Math.abs(diff/a*100).toFixed(1).replace('.',',')}% de diferença`:'Diferença por unidade'}</p></>:<p>Digite valores válidos para comparar.</p>}<div className="pc-difference-help"><ReceiptText size={19}/> Para comparar corretamente, considere descontos e a quantidade comprada.</div></aside></div>
+  </div>;
+}
