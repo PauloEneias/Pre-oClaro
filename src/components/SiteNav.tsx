@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ChevronDown, MapPin, Menu, Navigation, Radio, PauseCircle, X } from 'lucide-react';
+import { ChevronDown, CircleUserRound, LogOut, MapPin, Menu, Navigation, Radio, PauseCircle, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { neighborhoods, useUserLocation } from '../context/LocationContext';
 
 export default function SiteNav(){
@@ -8,13 +9,16 @@ export default function SiteNav(){
   const [open,setOpen]=useState(false);
   const [locOpen,setLocOpen]=useState(false);
   const {location,status,error,isWatching,requestLocation,startTracking,stopTracking,chooseNeighborhood,clearLocation}=useUserLocation();
+  const {user,loading:authLoading,signOut}=useAuth();
   const close=()=>setOpen(false);
+  const firstName=user?.name.split(' ')[0]??'';
   return <header className="p6-header">
     <Link to="/" className="p6-brand" onClick={close}><span className="p6-tag"><span/></span><span>PreçoClaro</span></Link>
     <nav aria-label="Navegação principal" className={`p6-nav ${open?'open':''}`}>
       <NavLink end className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/" onClick={close}>Início</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive||pathname.startsWith('/produto/')?'selected':''}`} to="/comparar" onClick={close}>Comparar preços</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/catalogo" onClick={close}>Catálogo completo</NavLink>
+      <NavLink className={({isActive})=>`p6-nav-link p6-nav-link-icon ${isActive?'selected':''}`} to="/estabelecimentos" onClick={close}><MapPin size={14} aria-hidden="true"/> Mercados próximos</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/conferir" onClick={close}>Conferir caixa</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/listas" onClick={close}>Listas</NavLink>
     </nav>
@@ -37,7 +41,9 @@ export default function SiteNav(){
           <Link onClick={()=>setLocOpen(false)} to="/estabelecimentos">Ver mercados reais próximos</Link>
         </div>}
       </div>
-      <Link className="p6-enter" to="/entrar">Entrar</Link><Link className="p6-create" to="/criar-conta">Criar conta</Link>
+      {authLoading ? <span className="p6-auth-wait" aria-hidden="true"/> : user
+        ? <><Link className="p6-enter p6-account" to="/perfil" onClick={close} title={user.email}><CircleUserRound size={16} aria-hidden="true"/> <span>{firstName}</span></Link><button type="button" className="p6-logout" onClick={()=>{close();void signOut();}} aria-label="Sair da conta" title="Sair da conta"><LogOut size={16}/></button></>
+        : <><Link className="p6-enter" to="/entrar" onClick={close}>Entrar</Link><Link className="p6-create" to="/criar-conta" onClick={close}>Criar conta</Link></>}
       <button className="p6-menu-toggle" aria-label={open?'Fechar menu':'Abrir menu'} aria-expanded={open} onClick={()=>setOpen(o=>!o)}>{open?<X/>:<Menu/>}</button>
     </div>
   </header>;

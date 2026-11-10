@@ -4,10 +4,11 @@ import { ResultsPage, ProductPage, CheckoutPage, StoresPage, ListsPage, ProfileP
 import PageShell from './components/PageShell';
 import { LocationProvider } from './context/LocationContext';
 import { BasketProvider } from './context/BasketContext';
+import { AuthProvider } from './context/AuthContext';
 import CatalogPage from './pages/CatalogPage';
 
 export default function App() {
-  return <BrowserRouter><LocationProvider><BasketProvider>
+  return <BrowserRouter><AuthProvider><LocationProvider><BasketProvider>
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route element={<PageShell />}>
@@ -23,5 +24,5 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  </BasketProvider></LocationProvider></BrowserRouter>;
+  </BasketProvider></LocationProvider></AuthProvider></BrowserRouter>;
 }

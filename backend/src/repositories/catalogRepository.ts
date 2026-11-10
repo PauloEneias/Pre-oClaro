@@ -20,13 +20,18 @@ const toRow = (r: RowDataPacket): CatalogRow => ({
   ...(r as unknown as CatalogRow), id: Number(r.id), price: Number(r.price), minimumQuantity: Number(r.minimumQuantity),
 });
 
+/** Trecho de texto do usuário como padrão de LIKE, com % e _ tratados como caracteres comuns. */
+export const likeTerm = (word: string) => `%${word.replace(/[\\%_]/g, '\\$&')}%`;
+/** Comparação que ignora maiúsculas E acentos ("feijao" encontra "Feijão"). */
+export const ACCENT_INSENSITIVE = 'COLLATE utf8mb4_0900_ai_ci';
+
 /** Cada palavra da pesquisa precisa aparecer no nome, na marca, na embalagem ou no GTIN. */
 function conditions(f: { q: string; network: string }) {
-  const words = f.q.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8);
-  const terms = words.map(() => "INSTR(LOWER(CONCAT_WS(' ', produto_nome, marca, embalagem, gtin)), LOWER(?))>0");
+  const words = f.q.split(/\s+/).filter(Boolean).slice(0, 8);
+  const terms = words.map(() => `CONCAT_WS(' ', produto_nome, marca, embalagem, gtin) ${ACCENT_INSENSITIVE} LIKE ?`);
   return {
     where: `uf='MA'${f.network ? ' AND rede=?' : ''}${terms.length ? ' AND ' + terms.join(' AND ') : ''}`,
-    args: [...(f.network ? [f.network] : []), ...words] as (string | number)[],
+    args: [...(f.network ? [f.network] : []), ...words.map(likeTerm)] as (string | number)[],
     hasTerms: terms.length > 0,
   };
 }
@@ -102,9 +107,9 @@ export async function documentedPrices(
 export async function similarCandidates(firstWord: string): Promise<{ gtin: string; name: string; brand: string; size: string }[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT gtin,produto_nome AS name,marca AS brand,embalagem AS size,MAX(referencia_em) AS lastReference
-     FROM ${TABLE} WHERE uf='MA' AND INSTR(LOWER(produto_nome),LOWER(?))>0
+     FROM ${TABLE} WHERE uf='MA' AND produto_nome ${ACCENT_INSENSITIVE} LIKE ?
      GROUP BY gtin,produto_nome,marca,embalagem ORDER BY lastReference DESC LIMIT 500`,
-    [firstWord]
+    [likeTerm(firstWord)]
   );
   return rows.map((r) => ({ gtin: String(r.gtin), name: String(r.name), brand: String(r.brand), size: String(r.size) }));
 }

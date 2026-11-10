@@ -49,6 +49,16 @@ export async function insertCheck(check: NewCheck): Promise<{ id: number; duplic
     return { id, duplicate: false };
   } catch (err) {
     await conn.rollback();
+    // Dois envios da mesma chave ao mesmo tempo (duplo clique): um deles perde a corrida na
+    // chave única ou no bloqueio. O registro do outro já existe — devolve esse.
+    const code = (err as { code?: string }).code;
+    if (code === 'ER_DUP_ENTRY' || code === 'ER_LOCK_DEADLOCK' || code === 'ER_LOCK_WAIT_TIMEOUT') {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const [rows] = await pool.execute<RowDataPacket[]>('SELECT id FROM conferencias WHERE chave_envio=?', [check.submissionKey]);
+        if (rows[0]) return { id: Number(rows[0].id), duplicate: true };
+        await new Promise((resolve) => setTimeout(resolve, 60));
+      }
+    }
     throw err;
   } finally {
     conn.release();

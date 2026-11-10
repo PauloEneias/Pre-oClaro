@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LocateFixed, MapPin, Navigation2, Search, AlertCircle, RefreshCw, PauseCircle, ExternalLink, Radio } from 'lucide-react';
+import { ArrowRight, LocateFixed, MapPin, Navigation2, Search, AlertCircle, RefreshCw, PauseCircle, ExternalLink, Radio, Tag } from 'lucide-react';
 import { getNearbyStores, type ApiStore, type StoresResponse } from '../api';
 import { neighborhoods, useUserLocation } from '../context/LocationContext';
 import StoresMap from '../components/StoresMap';
@@ -38,7 +38,7 @@ export default function StoresPage(){
   const matches=useMemo(()=>stores.filter(s=>`${s.name} ${s.neighborhood} ${s.address||''}`.toLowerCase().includes(query.toLowerCase())),[query,stores]);
 
   return <div className="pc-stores-page">
-    <span className="pc-kicker">ESTABELECIMENTOS REAIS</span>
+    <span className="pc-kicker">MERCADOS PRÓXIMOS</span>
     <h1>Mercados <em>perto de você</em></h1>
     <p>Encontre supermercados e mercados cadastrados no OpenStreetMap próximos da sua localização real.</p>
 
@@ -81,16 +81,17 @@ export default function StoresPage(){
         {location&&loading&&<p className="pc-api-state" role="status"><RefreshCw size={15} className="pc-spinning"/> Buscando lojas reais no OpenStreetMap e consultando o MySQL...</p>}
         {location&&apiError&&<div className="pc-api-error" role="alert"><AlertCircle size={19}/><span>{apiError}</span><button type="button" onClick={()=>setRetry(v=>v+1)}><RefreshCw size={16}/> Tentar de novo</button></div>}
         {location&&info?.sourceWarning&&!loading&&!apiError&&<p role="status" className="pc-geo-warn">{info.sourceWarning}</p>}
-        {location&&!loading&&!apiError&&<p className="pc-stores-count">{matches.length} estabelecimentos encontrados · {debouncedRadius} km · distância em linha reta</p>}
+        {location&&!loading&&!apiError&&<p className="pc-stores-count">{matches.length} estabelecimentos encontrados · raio de {debouncedRadius} km · {matches.filter(s=>s.offersCount>0).length} com preços coletados</p>}
         {location&&!loading&&!apiError&&matches.length===0&&<p className="pc-api-state">Nenhum mercado mapeado encontrado neste raio. Experimente ampliar a distância ou atualizar a consulta. A base OpenStreetMap pode estar incompleta.</p>}
         {!loading&&!apiError&&matches.map((s,i)=><div className={`pc-store-row pc-store-real ${selectedId===s.id?'pc-store-selected':''}`} key={s.osmId||s.id}>
           <div className="pc-store-icon"><MapPin size={20}/></div>
-          <button type="button" className="pc-store-description pc-store-choose" onClick={()=>setSelectedId(s.id)} aria-label={`Mostrar ${s.name} no mapa`}><strong>{s.name}</strong><small>{s.address??s.neighborhood} · {s.distanceKm===null?'Distância indisponível':km(s.distanceKm)}</small><span className="pc-osm-source">Cadastro OpenStreetMap · preços ainda não disponíveis</span></button>
+          <button type="button" className="pc-store-description pc-store-choose" onClick={()=>setSelectedId(s.id)} aria-label={`Mostrar ${s.name} no mapa`}><strong>{s.name}</strong><small>{s.address??s.neighborhood} · {s.distanceKm===null?'Distância indisponível':km(s.distanceKm)}</small><span className="pc-osm-source">{s.network?`${s.network} · `:''}Cadastro OpenStreetMap{s.offersCount>0?'':' · sem preços coletados para esta loja'}</span></button>
+          {s.offersCount>0&&<Link className="pc-store-offers" to={`/comparar?loja=${s.id}`} aria-label={`Ver ${s.offersCount} ofertas de ${s.name}`}><Tag size={14}/> {s.offersCount.toLocaleString('pt-BR')} ofertas</Link>}
           <button type="button" className="pc-map-focus" onClick={()=>setSelectedId(s.id)} aria-label={`Ver ${s.name} no mapa`} title="Ver no mapa"><MapPin size={17}/></button>
           <a href={osmPlaceLink(s.latitude,s.longitude)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${s.name} no OpenStreetMap`} title="Abrir mapa externo"><ExternalLink size={16}/></a>
           <span className="pc-store-num">{String(i+1).padStart(2,'0')}</span>
         </div>)}
-        {location&&!loading&&!apiError&&<p className="pc-muted">Nomes e coordenadas vêm de contribuições do OpenStreetMap, sem garantia de cadastro completo ou horário de funcionamento. Não existem preços verificados dessas lojas nesta etapa. <Link to="/comparar">Ver comparação demonstrativa <ArrowRight size={13}/></Link></p>}
+        {location&&!loading&&!apiError&&<p className="pc-muted">As distâncias são <strong>em linha reta</strong>, não o percurso pelas ruas. Nomes e coordenadas vêm de contribuições do OpenStreetMap, sem garantia de cadastro completo ou horário de funcionamento. Só aparecem ofertas nas lojas que foram ligadas com segurança a uma unidade das redes coletadas. <Link to="/catalogo">Ver todas as unidades no catálogo <ArrowRight size={13}/></Link></p>}
       </div>
       {location ? <StoresMap
         location={location}

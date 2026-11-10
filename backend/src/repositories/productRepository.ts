@@ -7,6 +7,7 @@ import type { RowDataPacket } from 'mysql2';
 import { pool } from '../db.js';
 import type { LocationFilter } from '../location.js';
 import type { PriceMode } from '../comparison.js';
+import { ACCENT_INSENSITIVE, likeTerm } from './catalogRepository.js';
 
 export type OfferRow = {
   id: number; productId: number; storeId: number;
@@ -62,10 +63,11 @@ function searchWhere(f: ProductSearch): { sql: string; args: (string | number)[]
   const parts = [`e.ativo=TRUE AND o.disponivel=TRUE AND ${modeFilter(f.mode)} AND o.quantidade_minima <= ?`];
   const args: (string | number)[] = [f.quantity];
   // Cada palavra precisa aparecer no nome, na marca ou na embalagem; um GTIN digitado casa direto.
-  const words = f.q.toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8);
+  // A comparação ignora maiúsculas e acentos ("acucar" encontra "Açúcar").
+  const words = f.q.split(/\s+/).filter(Boolean).slice(0, 8);
   for (const word of words) {
-    parts.push("(INSTR(LOWER(CONCAT_WS(' ', p.nome, p.marca, p.embalagem)), ?)>0 OR p.gtin = ?)");
-    args.push(word, word);
+    parts.push(`(CONCAT_WS(' ', p.nome, p.marca, p.embalagem) ${ACCENT_INSENSITIVE} LIKE ? OR p.gtin = ?)`);
+    args.push(likeTerm(word), word);
   }
   if (f.location) {
     parts.push(`${DISTANCE} <= ?`);

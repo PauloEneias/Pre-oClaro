@@ -104,6 +104,10 @@ test('catálogo: contagem real, primeira e última página, tamanho de página e
     assert.ok(second.body.items.every((i: any) => !seen.has(i.gtin)), 'páginas não repetem produtos');
   }
   assert.equal((await call('GET', '/api/catalog/items?perPage=40')).body.perPage, 40);
+  // A pesquisa ignora acentos e maiúsculas: "feijao" encontra "Feijão".
+  assert.equal((await call('GET', '/api/catalog/items?q=zzteste%20feijao')).body.total, 1);
+  assert.equal((await call('GET', '/api/catalog/items?q=ZZTESTE%20CAFE')).body.total, 1);
+  assert.equal((await call('GET', '/api/catalog/items?q=zzteste%20100%25')).body.total, 0, '% digitado não vira curinga');
   assert.equal((await call('GET', '/api/catalog/items?perPage=33')).status, 400);
   assert.equal((await call('GET', '/api/catalog/items?page=0')).status, 400);
   const byName = await call('GET', '/api/catalog/items?q=zzteste&sort=name');
@@ -328,6 +332,14 @@ test('conferir caixa: salvar, não duplicar, histórico pessoal e isolamento', a
   const [rows] = await pool.query<any[]>('SELECT COUNT(*) n FROM conferencias WHERE chave_envio=?', [body.submissionKey]);
   assert.equal(Number(rows[0].n), 1);
   assert.equal((await call('POST', '/api/checks', { cookie: bia.cookie, body })).status, 403, 'outra pessoa não reaproveita o envio');
+  // Duplo clique de verdade: cinco envios simultâneos da mesma conferência → um registro, nenhum erro.
+  const burst = check([line(2, 3)]);
+  const answers = await Promise.all(Array.from({ length: 5 }, () => call('POST', '/api/checks', { cookie: bia.cookie, body: burst })));
+  assert.ok(answers.every((a) => a.status === 200 || a.status === 201), JSON.stringify(answers.map((a) => [a.status, a.body.error])));
+  assert.equal(new Set(answers.map((a) => a.body.id)).size, 1);
+  const [burstRows] = await pool.query<any[]>('SELECT COUNT(*) n FROM conferencias WHERE chave_envio=?', [burst.submissionKey]);
+  assert.equal(Number(burstRows[0].n), 1);
+  await call('DELETE', `/api/checks/${answers[0].body.id}`, { cookie: bia.cookie });
 
   const history = await call('GET', '/api/checks', { cookie: ana.cookie });
   assert.equal(history.body.total, 1);
