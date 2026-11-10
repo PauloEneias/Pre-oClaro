@@ -5,3 +5,8 @@ dist/
 !.env.example
 *.log
 .DS_Store
+
+# Backups do banco e anexos enviados (nunca versionar)
+backups/
+backend/uploads/
+*.sql.gz

@@ -220,8 +220,12 @@ export async function resolveStoreId(location: StoreLocation, log?: Logger): Pro
     match.id,
   ]);
   log?.info(`[Lojas] "${location.name}" ligada à loja OSM "${match.nome}" (${Math.round(match.meters)} m).`);
-  const backfilled = await backfillGeolocatedOffers(location.externalId, match.id);
-  if (backfilled) log?.info(`[Lojas] ${backfilled} ofertas já coletadas de "${location.name}" passaram a ser geolocalizadas.`);
+  try {
+    const backfilled = await backfillGeolocatedOffers(location.externalId, match.id);
+    if (backfilled) log?.info(`[Lojas] ${backfilled} ofertas já coletadas de "${location.name}" passaram a ser geolocalizadas.`);
+  } catch (err) {
+    log?.warn(`[Lojas] não foi possível preencher as ofertas já coletadas de "${location.name}": ${(err as Error).message}`);
+  }
   return match.id;
 }
 
@@ -245,8 +249,8 @@ export async function backfillGeolocatedOffers(externalId: string, storeId: numb
       `INSERT INTO produtos(nome,marca,embalagem,gtin)
        SELECT MIN(c.produto_nome), MIN(c.marca), MIN(c.embalagem), c.gtin
        FROM (${latest}) l
-       JOIN catalogo_ofertas_documentadas c ON c.gtin=l.gtin AND c.canal_codigo=l.canal_codigo
-       LEFT JOIN produtos p ON p.gtin=c.gtin
+       JOIN catalogo_ofertas_documentadas c ON c.gtin=l.gtin COLLATE utf8mb4_unicode_ci AND c.canal_codigo=l.canal_codigo COLLATE utf8mb4_unicode_ci
+       LEFT JOIN produtos p ON p.gtin=c.gtin COLLATE utf8mb4_unicode_ci
        WHERE p.id IS NULL GROUP BY c.gtin`,
       [externalId, externalId]
     );
@@ -255,7 +259,7 @@ export async function backfillGeolocatedOffers(externalId: string, storeId: numb
          (produto_id,estabelecimento_id,preco,disponivel,tipo_fonte,fonte_url,condicao_oferta,quantidade_minima,consultado_em)
        SELECT p.id, ?, l.preco, TRUE, 'ONLINE', l.fonte_url,
               CONCAT('Coleta automática (', l.canal_nome, '). Preço unitário.'), 1, l.confirmado_em
-       FROM (${latest}) l JOIN produtos p ON p.gtin=l.gtin`,
+       FROM (${latest}) l JOIN produtos p ON p.gtin=l.gtin COLLATE utf8mb4_unicode_ci`,
       [storeId, externalId, externalId]
     );
     await conn.query(
@@ -749,7 +753,10 @@ async function runAtacadao(options: CollectionOptions): Promise<RunSummary> {
         longitude: result.store.longitude,
       },
       log
-    );
+    ).catch((err) => {
+      log?.warn(`[Lojas] "${result.store.channelName}" sem loja no mapa nesta execução: ${(err as Error).message}`);
+      return null;
+    });
     const items: PersistItem[] = result.offers.map((offer) => ({
       ...offer,
       notice: atacadaoNotice(offer),
@@ -823,7 +830,10 @@ async function runMateus(options: CollectionOptions): Promise<RunSummary> {
           ? await resolveStoreId(
               { externalId: market.externalId, network: 'Mateus Mais', name: market.name, latitude: market.latitude, longitude: market.longitude },
               log
-            )
+            ).catch((err) => {
+              log?.warn(`[Lojas] "${market.name}" sem loja no mapa nesta execução: ${(err as Error).message}`);
+              return null;
+            })
           : null
       );
     }
