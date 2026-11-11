@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, AlertCircle, Clock3, MapPin, ExternalLink, TrendingDown, Plus, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertCircle, Clock3, MapPin, ExternalLink, TrendingDown, Plus } from 'lucide-react';
 import { brl } from '../data';
 import { getProductDetail, getMarketOnlinePrices, type MarketOnlineResponse, type ProductDetailResponse, type PriceMode } from '../api';
 import { useUserLocation } from '../context/LocationContext';
-import { useBasket } from '../context/BasketContext';
 import { dateTime, productSubtitle, sourceTypeLabel } from '../format';
 import ProductImage from '../components/ProductImage';
+import { useAddToList } from '../components/AddToList';
 
 export default function ProductPage() {
   const { id } = useParams(); const [params] = useSearchParams();
   const { location } = useUserLocation();
-  const { add } = useBasket();
+  const { openAddToList } = useAddToList();
   // Sem o parâmetro vale a demonstração: é assim que os cartões de exemplo da Home abrem.
   const mode: PriceMode = params.get('mode') === 'real' ? 'real' : 'demo';
   const qty = Number(params.get('quantity') || 1);
@@ -21,9 +21,8 @@ export default function ProductPage() {
   const [onlineError, setOnlineError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [added, setAdded] = useState(false);
   useEffect(() => {
-    const controller = new AbortController(); setLoading(true); setError(null); setAdded(false);
+    const controller = new AbortController(); setLoading(true); setError(null);
     getProductDetail(Number(id), location, 10, mode, quantity, controller.signal)
       .then(result => { setData(result); setLoading(false); })
       .catch(err => { if (!controller.signal.aborted) { setError((err as Error).message); setLoading(false); } });
@@ -48,7 +47,7 @@ export default function ProductPage() {
         <div className="pc-product-flags"><span className="pc-soft-label"><Clock3 size={14} />{mode === 'demo' ? 'Valores fictícios' : 'Preços com data e origem'}</span>{product.gtin && <span className="pc-soft-label">GTIN {product.gtin}</span>}</div>
         <div className="pc-product-main-price"><span className="pc-money">{offers[0] ? brl(offers[0].price) : '—'}</span><span>{offers[0] ? `Menor valor por unidade · ${offers.length} ${offers.length === 1 ? 'loja' : 'lojas'}${quantity > 1 ? ` · para ${quantity} unidades` : ''}` : 'Sem ofertas válidas para a quantidade e região selecionadas'}</span></div>
         <div className="pc-inline-actions">
-          {mode === 'real' && product.gtin && <button type="button" className="pc-btn" onClick={() => { add({ gtin: product.gtin!, quantity, name: product.name, brand: product.brand, size: product.size }); setAdded(true); }}>{added ? <><Check size={17} /> Adicionado à lista</> : <><Plus size={17} /> Adicionar à minha lista</>}</button>}
+          {mode === 'real' && product.gtin && <button type="button" className="pc-btn" aria-haspopup="dialog" onClick={() => openAddToList({ gtin: product.gtin!, name: product.name, brand: product.brand, size: product.size, image: product.image }, quantity)}><Plus size={17} /> Adicionar à minha lista</button>}
           <Link className="pc-btn pc-btn-ghost" to={back}>Nova pesquisa <ArrowRight size={17} /></Link></div>
       </div>
       <section className="pc-chart-card" aria-label="Histórico de preços"><div className="pc-card-head"><h2>Histórico de preços</h2></div>

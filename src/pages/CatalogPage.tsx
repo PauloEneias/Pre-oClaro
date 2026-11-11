@@ -7,6 +7,7 @@ import { useBasket } from '../context/BasketContext';
 import { productSubtitle, referenceLabel, shortDate } from '../format';
 import Pagination from '../components/Pagination';
 import ProductImage from '../components/ProductImage';
+import { useAddToList } from '../components/AddToList';
 
 const PER_PAGE = [20, 40, 60] as const;
 const NETWORKS: Record<string, string> = { atacadao: 'Atacadão', mateus: 'Mateus Mais', comparar: CATALOG_COMPARE };
@@ -53,8 +54,8 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
-  const [added, setAdded] = useState('');
-  const { add, count } = useBasket();
+  const { count } = useBasket();
+  const { openAddToList } = useAddToList();
   const listTop = useRef<HTMLDivElement>(null);
   const firstLoad = useRef(true);
 
@@ -125,7 +126,7 @@ export default function CatalogPage() {
           <div><b>{brl(o.price)}</b>{quantity > 1 && <small>Total: {brl(o.total)}</small>}<a href={o.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`Abrir origem da oferta de ${o.channelName}`}><ExternalLink size={14} /> Fonte</a></div>
         </div>)}</div>
       </details>
-      <button className="pc-catalog-add" type="button" onClick={() => { if (!item.product) return; add({ gtin: item.gtin, quantity, name: item.product.name, brand: item.product.brand, size: item.product.size }); setAdded(item.gtin); }}><Plus size={18} />{added === item.gtin ? 'Adicionado! Adicionar mais' : 'Adicionar à minha lista'}</button>
+      <button className="pc-catalog-add" type="button" aria-haspopup="dialog" disabled={!item.product} onClick={() => { if (item.product) openAddToList({ gtin: item.gtin, name: item.product.name, brand: item.product.brand, size: item.product.size, image: item.image }, quantity); }}><Plus size={18} /> Adicionar à minha lista</button>
     </article>)}</div>}
     {result && !error && <Pagination page={result.page} pages={result.pages} total={result.total} perPage={perPage} perPageOptions={PER_PAGE} disabled={loading}
       onPage={p => patch({ pagina: p > 1 ? String(p) : null }, true)} onPerPage={n => patch({ por: n === 20 ? null : String(n) })} label="produtos" />}
