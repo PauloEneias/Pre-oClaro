@@ -1,3 +1,4 @@
+/** Reexporta as páginas para importações curtas em App.tsx (`import { ListsPage } from './pages'`). */
 export { default as ResultsPage } from './ResultsPage';
 export { default as ProductPage } from './ProductPage';
 export { default as CheckoutPage } from './CheckoutPage';

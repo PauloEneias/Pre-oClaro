@@ -37,8 +37,10 @@ async function assertOwner(userId: number, listId: number): Promise<void> {
   if (!Number.isSafeInteger(listId) || listId < 1 || !(await lists.ownsList(userId, listId))) throw notFound('Lista não encontrada.');
 }
 
+/** Listas do usuário com contagem de itens e unidades. */
 export const all = (userId: number) => lists.listsOfUser(userId);
 
+/** Cria lista (até 30 por usuário). */
 export async function create(userId: number, rawName: unknown) {
   const name = validListName(rawName);
   if ((await lists.countLists(userId)) >= MAX_LISTS) throw badRequest(`Você pode ter até ${MAX_LISTS} listas.`);
@@ -46,11 +48,13 @@ export async function create(userId: number, rawName: unknown) {
   return (await lists.listsOfUser(userId)).find((l) => l.id === id)!;
 }
 
+/** Renomeia, conferindo antes que a lista é do usuário (senão 404, sem revelar que existe). */
 export async function rename(userId: number, listId: number, rawName: unknown) {
   await assertOwner(userId, listId);
   await lists.renameList(userId, listId, validListName(rawName));
 }
 
+/** Exclui a lista; os itens saem junto (ON DELETE CASCADE). */
 export async function remove(userId: number, listId: number) {
   await assertOwner(userId, listId);
   await lists.deleteList(userId, listId);
@@ -65,6 +69,10 @@ export async function detail(userId: number, listId: number) {
   return { list, items, comparison: pending.length ? await compareBasketLines(pending) : null };
 }
 
+/**
+ * Adiciona itens validados. Repetições no mesmo envio são somadas ('add') ou ficam com a maior
+ * quantidade ('max'); o limite de 80 produtos por lista é verificado dentro da transação.
+ */
 export async function addItems(userId: number, listId: number, rawItems: unknown, mode: 'add' | 'max') {
   await assertOwner(userId, listId);
   if (!Array.isArray(rawItems) || rawItems.length === 0 || rawItems.length > MAX_ITEMS) throw badRequest(`Envie de 1 a ${MAX_ITEMS} produtos.`);
@@ -81,6 +89,7 @@ export async function addItems(userId: number, listId: number, rawItems: unknown
   }
 }
 
+/** Altera quantidade (1 a 999) e/ou marca como comprado. */
 export async function updateItem(userId: number, listId: number, gtin: string, patch: { quantity?: unknown; purchased?: unknown }) {
   await assertOwner(userId, listId);
   const changes: { quantity?: number; purchased?: boolean } = {};
@@ -92,11 +101,13 @@ export async function updateItem(userId: number, listId: number, gtin: string, p
   if (!(await lists.updateItem(listId, gtin, changes))) throw notFound('Produto não está nesta lista.');
 }
 
+/** Remove um produto da lista. */
 export async function removeItem(userId: number, listId: number, gtin: string) {
   await assertOwner(userId, listId);
   if (!(await lists.removeItem(listId, gtin))) throw notFound('Produto não está nesta lista.');
 }
 
+/** Esvazia a lista. */
 export async function clear(userId: number, listId: number) {
   await assertOwner(userId, listId);
   await lists.clearItems(listId);

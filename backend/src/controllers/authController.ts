@@ -7,6 +7,15 @@ import { userCheckStats } from '../repositories/checkRepository.js';
 
 type Body = Record<string, unknown>;
 
+/**
+ * Rotas /api/auth/*:
+ *  POST register | login → cria sessão e devolve o cookie HttpOnly
+ *  POST logout           → apaga a sessão no banco e o cookie
+ *  GET  me               → usuário atual (ou null)  ·  PATCH me → troca o nome
+ *  POST password         → troca a senha (exige a atual; encerra as outras sessões)
+ *  GET  summary          → números do perfil (listas e conferências)
+ * O `scope` aplica csrfGuard a todas as rotas que alteram dados.
+ */
 export function registerAuthRoutes(app: FastifyInstance): void {
   app.register(async (scope) => {
     scope.addHook('preHandler', csrfGuard);

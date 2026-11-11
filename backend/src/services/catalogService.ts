@@ -104,6 +104,7 @@ function networkComparison(rows: CatalogRow[], gtin: string, quantity: number) {
   return { ...result, sides: result.sides.map((side) => ({ ...side, offer: side.offer ? withFreshness(side.offer) : null })) };
 }
 
+/** Um GTIN em todas as unidades, com marcação de preço antigo (stale) e foto. */
 export async function compareOne(gtin: string, quantity: number) {
   const rows = await catalog.rowsForGtins([gtin]);
   if (!rows.length) return null;
@@ -121,6 +122,7 @@ export async function compareBasketLines(basket: BasketLine[]) {
   return { source: 'CATALOGO_DOCUMENTADO' as const, pricesAreLive: false as const, ...compareBasket(rows, basket) };
 }
 
+/** Lista "Catálogos online" da página /comparar: melhor faixa de cada produto em cada unidade. */
 export async function documentedPrices(q: string, quantity: number, page: number, perPage: number) {
   // Com pesquisa, só entram os produtos que SÃO o item pesquisado (nível forte da relevância).
   let result: { total: number; rows: CatalogRow[] };
@@ -145,6 +147,7 @@ export async function documentedPrices(q: string, quantity: number, page: number
   };
 }
 
+/** Sugestões de nomes parecidos (Jaccard). Nunca unem GTINs diferentes. */
 export async function similar(input: { q: string; brand: string; size: string; gtin: string }) {
   const candidates = await catalog.similarCandidates(input.q.split(/\s+/)[0]);
   const source = { name: input.q, brand: input.brand, size: input.size, gtin: input.gtin };
@@ -156,4 +159,5 @@ export async function similar(input: { q: string; brand: string; size: string; g
   return { query: input.q, matches, note: 'Similaridade textual é apenas sugestão. A identificação automática exige o mesmo GTIN conferido.' };
 }
 
+/** Redes e unidades presentes no catálogo. */
 export const channels = () => catalog.listChannels();

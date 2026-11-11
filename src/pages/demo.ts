@@ -1,3 +1,7 @@
+/**
+ * Ofertas FICTÍCIAS para o modo demonstração (preços gerados a partir do produto de exemplo).
+ * Mantido separado dos dados reais para que nenhuma tela confunda exemplo com coleta.
+ */
 import { products, type Product } from '../data';
 export type Offer = { store:string; distance:number; price:number; updated:string; verified:boolean; note?:string };
 const shops = ['Mercado Avenida','Atacadão','Supermercado Comper','Mercado Big'];

@@ -145,6 +145,7 @@ export async function pageOfProductIds(f: ProductSearch, limit: number, offset: 
 }
 
 /** Todas as ofertas elegíveis dos produtos da página (uma consulta só, sem N+1). Os ids já vêm escolhidos. */
+/** Ofertas atuais de um produto (até 100), mais baratas primeiro, com distância se houver posição. */
 export async function offersForProducts(f: ProductSearch, productIds: number[]): Promise<OfferRow[]> {
   if (!productIds.length) return [];
   const where = searchWhere(f);
@@ -160,6 +161,7 @@ export async function offersForProducts(f: ProductSearch, productIds: number[]):
 
 export type ProductRow = { id: number; name: string; brand: string; size: string; gtin: string | null; image: string | null };
 
+/** Produto pelo id, com a melhor foto disponível. */
 export async function findProduct(id: number): Promise<ProductRow | null> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT p.id,p.nome AS name,p.marca AS brand,p.embalagem AS size,p.gtin,${IMAGE_SQL} AS image FROM produtos p WHERE p.id=?`,
@@ -206,6 +208,7 @@ export type OnlinePriceRow = {
   channel: string; price: number; available: boolean; source: string; observedAt: Date; syncedAt: Date;
 };
 
+/** Preços digitais disponíveis de um GTIN numa UF. */
 export async function onlinePrices(gtin: string, uf: string): Promise<OnlinePriceRow[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT id, gtin, produto_nome AS productName, rede AS network,

@@ -1,3 +1,8 @@
+/**
+ * MAPA DAS LOJAS sem biblioteca externa: desenha os blocos (tiles) do OpenStreetMap e os
+ * marcadores com projeção Web Mercator (project/unproject). Suporta arrastar, zoom por botões
+ * e ajuste automático para mostrar todas as lojas (fitView).
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExternalLink, LocateFixed, MapPin, Minus, Plus, Store, ZoomIn } from 'lucide-react';
 import type { ApiStore } from '../api';
@@ -22,6 +27,7 @@ const numberKm = (n: number | null) => n === null ? 'distância indisponível' :
 
 // Projeção Web Mercator, a mesma utilizada pelos mosaicos do OpenStreetMap.
 // Não dependemos de um segundo iframe: cada coordenada recebe seu próprio marcador.
+/** Latitude/longitude → pixel global no nível de zoom (Web Mercator, blocos de 256 px). */
 export function project(point: Point, zoom: number) {
   // O driver MySQL pode serializar campos DECIMAL como texto; normalizamos no cliente.
   const latitude = clamp(Number(point.latitude), -85.05112878, 85.05112878);
@@ -33,6 +39,7 @@ export function project(point: Point, zoom: number) {
     y: (1 - Math.log(Math.tan(Math.PI / 4 + rad / 2)) / Math.PI) / 2 * scale,
   };
 }
+/** Inverso de project: pixel global → latitude/longitude. */
 export function unproject(x: number, y: number, zoom: number): Point {
   const scale = TILE * 2 ** zoom;
   return {
@@ -41,6 +48,7 @@ export function unproject(x: number, y: number, zoom: number): Point {
   };
 }
 
+/** Maior zoom em que todos os pontos cabem na área visível, centrado neles. */
 function fitView(points: Point[], size: Dimensions): View {
   if (points.length === 0) return { latitude: -2.53, longitude: -44.28, zoom: 13 };
   if (size.width < 80 || size.height < 80) return { ...points[0], zoom: 13 };

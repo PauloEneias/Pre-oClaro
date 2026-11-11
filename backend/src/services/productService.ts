@@ -54,6 +54,7 @@ export async function search(filters: ProductSearch, page: number, perPage: numb
   };
 }
 
+/** Produto, ofertas atuais e histórico; a economia só existe com 2 ou mais ofertas diferentes. */
 export async function detail(productId: number, mode: PriceMode, quantity: number, location: LocationFilter | null) {
   const product = await products.findProduct(productId);
   if (!product) throw notFound('Produto não encontrado.');
@@ -65,6 +66,7 @@ export async function detail(productId: number, mode: PriceMode, quantity: numbe
   return { mode, isDemo: mode === 'demo', quantity, product, offers, savings, history };
 }
 
+/** Preços digitais por UF de um EAN (fonte Data Market), sempre sinalizados como não-prateleira. */
 export async function onlinePrices(ean: string, uf: string) {
   const rows = await products.onlinePrices(ean, uf);
   return {

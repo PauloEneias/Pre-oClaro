@@ -38,6 +38,10 @@ UPDATE estabelecimentos
 -- Histórico confiável: uma linha por MUDANÇA de preço de cada produto/unidade/faixa.
 --   coletado_em   = quando esse preço foi visto pela primeira vez (UTC)
 --   confirmado_em = última coleta em que o mesmo preço continuava valendo (UTC)
+-- OBSERVAÇÕES DE PREÇO (histórico confiável da coleta automática).
+--  Deduplicação: se o preço não mudou, a coleta só atualiza confirmado_em (não cria linha).
+--  UNIQUE(gtin, canal_codigo, quantidade_minima, coletado_em) impede duplicatas.
+--  Índice (canal_codigo, gtin, quantidade_minima, coletado_em) acha a última observação.
 CREATE TABLE IF NOT EXISTS observacoes_preco (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   gtin VARCHAR(14) NOT NULL,
@@ -61,6 +65,8 @@ CREATE TABLE IF NOT EXISTS observacoes_preco (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Código interno da rede → EAN conferido. Evita repetir a consulta de catálogo a cada coleta.
+-- SKU INTERNO DA REDE → GTIN conferido. PK composta (rede, sku). gtin NULL = a rede não
+--  informa EAN válido para aquele SKU (ex.: itens vendidos por quilo), que fica fora da comparação.
 CREATE TABLE IF NOT EXISTS mercado_sku_gtin (
   rede VARCHAR(40) NOT NULL,
   sku VARCHAR(40) NOT NULL,
@@ -72,6 +78,12 @@ CREATE TABLE IF NOT EXISTS mercado_sku_gtin (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Registro de cada execução da coleta (o que foi encontrado, gravado, ignorado e os erros).
+-- EXECUÇÕES DA COLETA (uma linha por rodada de cada fonte).
+--  status: EM_ANDAMENTO (gravado ao iniciar), SUCESSO, PARCIAL (parte das consultas falhou,
+--  o que foi coletado é mantido) ou FALHA (nada aproveitável). Uma execução que ficou em
+--  EM_ANDAMENTO porque o processo caiu é encerrada como FALHA quando a próxima execução
+--  da mesma fonte começa (marketSync.openRun).
+--  Contadores: encontrados, validos, novos, alterados, confirmados, ignorados e erros.
 CREATE TABLE IF NOT EXISTS coleta_execucoes (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   fonte VARCHAR(40) NOT NULL,

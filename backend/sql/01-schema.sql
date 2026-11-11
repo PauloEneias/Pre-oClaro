@@ -3,6 +3,12 @@
 CREATE DATABASE IF NOT EXISTS precoclaro CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE precoclaro;
 
+-- ESTABELECIMENTOS — lojas físicas (unidades) com coordenadas.
+--  PK id (AUTO_INCREMENT). Índice (cidade, uf, ativo) acelera a listagem por cidade.
+--  CHECK de latitude/longitude impede coordenadas impossíveis.
+--  demonstracao=TRUE marca lojas fictícias: elas nunca aparecem no modo de preços reais.
+--  Colunas acrescentadas depois: osm_id, endereco, fonte_localizacao, atualizado_em (03)
+--  e codigo_externo (09, liga a loja do mapa à unidade da rede).
 CREATE TABLE IF NOT EXISTS estabelecimentos (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nome VARCHAR(150) NOT NULL,
@@ -19,6 +25,10 @@ CREATE TABLE IF NOT EXISTS estabelecimentos (
   CONSTRAINT chk_longitude CHECK (longitude BETWEEN -180 AND 180)
 ) ENGINE=InnoDB;
 
+-- PRODUTOS — item vendido, identificado pelo GTIN/EAN (código de barras).
+--  UNIQUE(gtin): o mesmo código de barras não pode virar dois produtos. gtin é NULL nos
+--  itens de demonstração. imagem guarda só arquivos locais da demonstração (fotos reais
+--  ficam em produto_imagens, migração 10).
 CREATE TABLE IF NOT EXISTS produtos (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nome VARCHAR(150) NOT NULL,
@@ -31,6 +41,11 @@ CREATE TABLE IF NOT EXISTS produtos (
   INDEX idx_produtos_nome (nome)
 ) ENGINE=InnoDB;
 
+-- OFERTAS — preço ATUAL de um produto numa loja (relação N:N produtos × estabelecimentos).
+--  UNIQUE(produto_id, estabelecimento_id): uma oferta vigente por produto e loja; cada
+--  mudança de preço vai para historico_precos (migração 04).
+--  FKs garantem que produto e loja existam. CHECK: preço >= 0 e quantidade mínima >= 1.
+--  tipo_fonte separa DEMO (fictício) de ONLINE/LOJA/USUARIO (dados reais com procedência).
 CREATE TABLE IF NOT EXISTS ofertas (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   produto_id INT UNSIGNED NOT NULL,

@@ -9,6 +9,15 @@ import * as checks from '../services/checkService.js';
 
 type Body = Record<string, unknown>;
 
+/**
+ * Rotas /api/checks (Conferir Caixa):
+ *  POST /api/checks/preview          calcula sem gravar (funciona sem login)
+ *  POST /api/checks                  grava (chave de envio única evita duplicidade)
+ *  GET  /api/checks                  histórico paginado do usuário
+ *  GET|DELETE /api/checks/:id        detalhe / exclusão (somente do dono)
+ *  POST /api/checks/:id/attachments  foto (multipart, 1 arquivo, até 4 MB)
+ *  GET|DELETE /api/checks/:id/attachments/:attachmentId  anexo privado do dono
+ */
 export function registerCheckRoutes(app: FastifyInstance): void {
   app.register(async (scope) => {
     scope.addHook('preHandler', csrfGuard);

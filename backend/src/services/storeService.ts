@@ -10,6 +10,11 @@ import * as stores from '../repositories/storeRepository.js';
 
 type Logger = { warn: (...args: unknown[]) => void };
 
+/**
+ * Mercados próximos: consulta o OpenStreetMap, grava/atualiza as lojas (upsert pelo osm_id)
+ * e pede ao MySQL as lojas no raio. Se o OSM falhar, usa o que já está no banco e avisa;
+ * sem nada no banco responde 503 — nunca inventa mercados.
+ */
 export async function nearby(location: LocationFilter, log: Logger) {
   let sourceStatus: 'updated' | 'mysql_cache' = 'updated';
   let sourceWarning: string | null = null;

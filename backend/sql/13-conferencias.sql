@@ -9,6 +9,8 @@
 --    arquivo. Eles nunca são públicos e só existem para conferências de usuários logados.
 USE precoclaro;
 
+-- CONFERÊNCIAS — cabeçalho (loja, data, totais). UNIQUE(chave_envio) torna o envio
+--  idempotente. ON DELETE SET NULL: se a conta for excluída, a conferência vira anônima.
 CREATE TABLE IF NOT EXISTS conferencias (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT UNSIGNED NULL,
@@ -27,6 +29,8 @@ CREATE TABLE IF NOT EXISTS conferencias (
   CONSTRAINT fk_conferencia_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ITENS DA CONFERÊNCIA — 1 conferência : N itens (ON DELETE CASCADE). gtin é opcional
+--  (produto digitado sem código de barras). CHECK de preços não negativos e quantidade.
 CREATE TABLE IF NOT EXISTS conferencia_itens (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   conferencia_id BIGINT UNSIGNED NOT NULL,
@@ -41,6 +45,8 @@ CREATE TABLE IF NOT EXISTS conferencia_itens (
   CONSTRAINT chk_conferencia_qtd CHECK (quantidade BETWEEN 1 AND 999)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ANEXOS — fotos privadas da etiqueta ou do comprovante. Só o nome interno do arquivo
+--  é gravado. ON DELETE CASCADE remove o registro junto com a conferência.
 CREATE TABLE IF NOT EXISTS conferencia_anexos (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   conferencia_id BIGINT UNSIGNED NOT NULL,

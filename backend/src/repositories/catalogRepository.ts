@@ -183,6 +183,7 @@ export async function documentedPrices(
   return { total: Number(count[0]?.total ?? 0), rows: rows.map(toRow) };
 }
 
+/** Até 500 produtos cujo nome contém a primeira palavra pesquisada (base da similaridade). */
 export async function similarCandidates(firstWord: string): Promise<{ gtin: string; name: string; brand: string; size: string }[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT gtin,produto_nome AS name,marca AS brand,embalagem AS size,MAX(referencia_em) AS lastReference

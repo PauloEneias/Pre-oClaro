@@ -1,3 +1,10 @@
+/**
+ * "ADICIONAR À LISTA" — modal acessível usado pelo catálogo e pela comparação.
+ * Fluxo: escolher quantidade → escolher uma lista existente ou criar uma nova → confirmar.
+ * Se o produto já está na lista, o usuário escolhe somar ou substituir a quantidade.
+ * Acessibilidade: foco preso no diálogo (Tab/Shift+Tab), Esc fecha, o foco volta ao botão
+ * que abriu; aviso (toast) com link para a lista ao terminar.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowRight, Check, CheckCircle2, ListPlus, Loader2, Minus, Plus, ShoppingBasket, X } from 'lucide-react';
@@ -16,6 +23,7 @@ type Toast = { id: number; kind: 'ok' | 'error'; text: string; listId?: string }
 type Ctx = { openAddToList: (product: ProductForList, quantity?: number) => void };
 const AddToListContext = createContext<Ctx | null>(null);
 
+/** Hook que devolve `openAddToList(produto, quantidade)` para qualquer botão da aplicação. */
 export function useAddToList() {
   const ctx = useContext(AddToListContext);
   if (!ctx) throw new Error('AddToListProvider ausente');
@@ -63,6 +71,7 @@ function ListToast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
+/** Diálogo modal (role="dialog", aria-modal) com a escolha de lista e quantidade. */
 function AddToListModal({ product, initialQuantity, onClose, onDone }: {
   product: ProductForList; initialQuantity: number; onClose: () => void; onDone: (t: Omit<Toast, 'id'>) => void;
 }) {

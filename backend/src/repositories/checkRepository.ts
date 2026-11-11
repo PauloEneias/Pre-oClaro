@@ -71,6 +71,7 @@ export async function findBySubmissionKey(key: string): Promise<CheckHeader | nu
   return rows[0] ? toHeader(rows[0]) : null;
 }
 
+/** Página do histórico do usuário (mais recentes primeiro) e o total. */
 export async function checksOfUser(userId: number, limit: number, offset: number): Promise<{ total: number; checks: CheckHeader[] }> {
   const [count] = await pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS n FROM conferencias WHERE usuario_id=?', [userId]);
   const [rows] = await pool.execute<RowDataPacket[]>(
@@ -86,6 +87,7 @@ export async function findCheckOfUser(userId: number, id: number): Promise<Check
   return rows[0] ? toHeader(rows[0]) : null;
 }
 
+/** Itens de uma conferência. */
 export async function itemsOfCheck(id: number): Promise<CheckItemRow[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     'SELECT gtin,produto_nome,preco_prateleira,preco_caixa,quantidade FROM conferencia_itens WHERE conferencia_id=? ORDER BY id',
@@ -97,6 +99,7 @@ export async function itemsOfCheck(id: number): Promise<CheckItemRow[]> {
   }));
 }
 
+/** Exclui a conferência do usuário (itens e anexos saem por ON DELETE CASCADE). */
 export async function deleteCheckOfUser(userId: number, id: number): Promise<boolean> {
   const [result] = await pool.execute<ResultSetHeader>('DELETE FROM conferencias WHERE id=? AND usuario_id=?', [id, userId]);
   return result.affectedRows > 0;
@@ -106,11 +109,13 @@ const toAttachment = (r: RowDataPacket): Attachment => ({
   id: Number(r.id), kind: r.tipo, file: String(r.arquivo), mime: String(r.mime), size: Number(r.tamanho), createdAt: r.criado_em,
 });
 
+/** Anexos de uma conferência (o nome do arquivo em disco fica só no servidor). */
 export async function attachmentsOfCheck(checkId: number): Promise<Attachment[]> {
   const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM conferencia_anexos WHERE conferencia_id=? ORDER BY id', [checkId]);
   return rows.map(toAttachment);
 }
 
+/** Registra um anexo já gravado em disco. */
 export async function insertAttachment(checkId: number, a: Omit<Attachment, 'id' | 'createdAt'>): Promise<number> {
   const [result] = await pool.execute<ResultSetHeader>(
     'INSERT INTO conferencia_anexos(conferencia_id,tipo,arquivo,mime,tamanho) VALUES(?,?,?,?,?)',
@@ -119,15 +124,18 @@ export async function insertAttachment(checkId: number, a: Omit<Attachment, 'id'
   return Number(result.insertId);
 }
 
+/** Anexo pertencente àquela conferência. */
 export async function findAttachment(checkId: number, attachmentId: number): Promise<Attachment | null> {
   const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM conferencia_anexos WHERE id=? AND conferencia_id=?', [attachmentId, checkId]);
   return rows[0] ? toAttachment(rows[0]) : null;
 }
 
+/** Remove o registro do anexo. */
 export async function deleteAttachment(attachmentId: number): Promise<void> {
   await pool.execute('DELETE FROM conferencia_anexos WHERE id=?', [attachmentId]);
 }
 
+/** Totais do perfil: conferências, itens divergentes e valor cobrado a mais. */
 export async function userCheckStats(userId: number): Promise<{ checks: number; divergentItems: number; overcharged: number }> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT COUNT(*) AS n, COALESCE(SUM(itens_divergentes),0) AS divergentes,

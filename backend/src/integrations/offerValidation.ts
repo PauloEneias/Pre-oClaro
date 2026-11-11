@@ -206,6 +206,7 @@ export function saoLuisDate(iso: string): string {
   return new Date(new Date(iso).getTime() - 3 * 3_600_000).toISOString().slice(0, 10);
 }
 
+/** Valor em reais para mensagens de procedência ("R$ 12,90"). */
 export function brl(value: number): string {
   return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }

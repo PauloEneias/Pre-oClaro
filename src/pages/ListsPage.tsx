@@ -1,3 +1,10 @@
+/**
+ * MINHAS LISTAS (rota /listas).
+ * Criar, renomear, excluir e abrir listas; editar quantidades; marcar itens comprados; e
+ * comparar a lista inteira entre redes/unidades. O total por loja só aparece quando a loja
+ * tem TODOS os itens (cesta incompleta nunca recebe total); a "compra dividida" indica onde
+ * comprar cada item pelo menor preço. Os cálculos vêm do servidor (centavos inteiros).
+ */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, AlertCircle, ShoppingBasket, Trash2, RefreshCw, Check, ExternalLink, Pencil, Plus, CloudUpload, X } from 'lucide-react';

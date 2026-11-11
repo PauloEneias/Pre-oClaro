@@ -19,6 +19,10 @@ export function parseSemicolonCsv(content:string):string[][] {
   row.push(field.trim());if(row.some(v=>v!==''))result.push(row);
   return result;
 }
+/**
+ * Valida GTIN-8/12/13/14 pelo dígito verificador (módulo 10, pesos 3 e 1 da direita para a
+ * esquerda). Ex.: 7891000100103 é válido; trocar um dígito invalida o código.
+ */
 export function gtinValid(gtin:string):boolean {
   if(!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(gtin))return false;
   const digits=gtin.split('').map(Number);
@@ -26,6 +30,7 @@ export function gtinValid(gtin:string):boolean {
   const sum=digits.reverse().reduce((total,digit,i)=>total+digit*(i%2===0?3:1),0);
   return (10-sum%10)%10===check;
 }
+/** "22,90" ou "22.90" → 22.9 (exige duas casas e valor positivo; calcula em centavos). */
 export function parseBrazilPrice(value:string):number {
   const normalized=/^\d{1,7},\d{2}$/.test(value)?value.replace(',','.'):value;
   if(!/^\d{1,7}\.\d{2}$/.test(normalized))throw new Error('Preço deve ter duas casas decimais (ex.: 22,90).');

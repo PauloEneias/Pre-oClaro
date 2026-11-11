@@ -44,6 +44,7 @@ import { SAO_LUIS_CATALOG_SEED, SEED_REFERENCE_DATE } from './seedSaoLuis.js';
 
 export type Logger = { info: (...args: unknown[]) => void; warn: (...args: unknown[]) => void };
 
+/** ISO 8601 → "AAAA-MM-DD HH:MM:SS" em UTC (formato aceito por colunas DATETIME). */
 export function mysqlUTC(date: string): string {
   return new Date(date).toISOString().slice(0, 19).replace('T', ' ');
 }
@@ -105,6 +106,10 @@ export async function saveOnlineQuotes(quotes: OnlineQuote[]): Promise<number> {
   }
 }
 
+/**
+ * Atualiza os preços online por UF de um GTIN (provedor Data Market). Exige GTIN válido e a
+ * chave DATA_MARKET_API_KEY; devolve quantas cotações vieram e quantas linhas mudaram.
+ */
 export async function syncMarketGtin(gtin: string): Promise<{ matched: number; updated: number }> {
   if (!gtinValid(gtin)) throw new Error(`GTIN inválido: ${gtin}`);
   const apiKey = process.env.DATA_MARKET_API_KEY?.trim() || '';

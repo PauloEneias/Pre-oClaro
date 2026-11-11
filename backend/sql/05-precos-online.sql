@@ -2,6 +2,9 @@
 -- Não confundir com ofertas de uma unidade física geolocalizada.
 -- Reexecutável. Requer as migrações 01, 03 e 04 anteriores.
 USE precoclaro;
+-- PREÇOS ONLINE por UF (fonte Data Market): último preço de cada GTIN em cada loja/canal.
+--  UNIQUE(gtin, estabelecimento, uf, canal, fonte) mantém uma linha por combinação (upsert).
+--  Índice (gtin, uf, observado_em) atende à consulta GET /api/market/prices.
 CREATE TABLE IF NOT EXISTS precos_online (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   gtin VARCHAR(14) NOT NULL,
@@ -19,6 +22,7 @@ CREATE TABLE IF NOT EXISTS precos_online (
   INDEX idx_preco_online_busca (gtin, uf, observado_em),
   CONSTRAINT chk_preco_online_positivo CHECK (preco > 0)
 ) ENGINE=InnoDB;
+-- Histórico dos preços online: uma linha por observação, sem duplicar o mesmo instante.
 CREATE TABLE IF NOT EXISTS historico_precos_online (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   gtin VARCHAR(14) NOT NULL,

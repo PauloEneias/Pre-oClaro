@@ -7,6 +7,8 @@
 -- a partir das observações mais recentes.
 USE precoclaro;
 
+-- LISTAS — 1 usuário : N listas. ON DELETE CASCADE: excluir a conta exclui as listas.
+--  Índice (usuario_id, atualizado_em) lista as listas do usuário da mais recente para a mais antiga.
 CREATE TABLE IF NOT EXISTS listas (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT UNSIGNED NOT NULL,
@@ -17,6 +19,9 @@ CREATE TABLE IF NOT EXISTS listas (
   CONSTRAINT fk_lista_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ITENS DA LISTA — 1 lista : N itens (composição: o item não existe sem a lista).
+--  UNIQUE(lista_id, gtin): o mesmo produto aparece uma vez por lista (a quantidade é somada).
+--  CHECK quantidade entre 1 e 999.
 CREATE TABLE IF NOT EXISTS lista_itens (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   lista_id INT UNSIGNED NOT NULL,

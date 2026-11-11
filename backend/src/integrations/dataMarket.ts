@@ -24,6 +24,11 @@ type RawOffer = Record<string, unknown>;
 type RawData = Record<string, unknown>;
 const PROVIDER_URL = 'https://datamarket.cnovatech.com.br/api/v1/market';
 
+/**
+ * Converte a resposta do provedor em cotações padronizadas: descarta ofertas sem rede, de
+ * outra UF ou com preço fora do intervalo válido, e mantém uma cotação por loja/UF/canal.
+ * Função pura (testada sem rede).
+ */
 export function normalizeMarketPayload(payload: unknown, requestedGtin: string, state = 'MA'): OnlineQuote[] {
   if (!gtinValid(requestedGtin)) throw new Error('GTIN inválido.');
   if (!payload || typeof payload !== 'object') throw new Error('Resposta do provedor inválida.');
@@ -65,6 +70,7 @@ export function normalizeMarketPayload(payload: unknown, requestedGtin: string, 
   return results;
 }
 
+/** Consulta o provedor autorizado (com chave e tempo limite) e normaliza a resposta. */
 export async function fetchMarketQuotes(gtin: string, apiKey: string, state = 'MA'): Promise<OnlineQuote[]> {
   if (!gtinValid(gtin)) throw new Error('GTIN inválido.');
   if (!apiKey) throw new Error('DATA_MARKET_API_KEY não configurada.');

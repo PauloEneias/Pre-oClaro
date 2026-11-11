@@ -1,3 +1,9 @@
+/**
+ * ENTRAR / CRIAR CONTA (rotas /entrar e /criar-conta).
+ * Valida no navegador para dar retorno rápido, mas a regra vale no servidor (bcrypt,
+ * limite de tentativas, e-mail único). Depois do login volta para `?voltar=`, aceito apenas
+ * se for um caminho interno (safeNext) — evita redirecionamento aberto para outro site.
+ */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, ArrowRight, Eye, EyeOff, Leaf, LockKeyhole, Mail, UserRound } from 'lucide-react';

@@ -12,6 +12,7 @@ export type CatalogRow={
 export type BasketLine={gtin:string;quantity:number};
 const toCents=(n:number)=>Math.round(n*100);
 const money=(n:number)=>Math.round(n)/100;
+/** Valida a cesta enviada (1 a 80 itens, GTIN numérico, 1 a 999 un.) e soma GTINs repetidos. */
 export function validateBasket(input:unknown):BasketLine[]{
   if(!Array.isArray(input)||input.length===0||input.length>80)throw new Error('Informe de 1 a 80 itens na cesta.');
   const map=new Map<string,number>();
@@ -28,6 +29,10 @@ export function validateBasket(input:unknown):BasketLine[]{
   }
   return [...map].map(([gtin,quantity])=>({gtin,quantity}));
 }
+/**
+ * Mantém só a observação mais recente de cada faixa (GTIN + unidade + quantidade mínima).
+ * Faixas que não reapareceram na coleta mais nova daquela unidade deixam de valer.
+ */
 export function recentTierRows(rows:CatalogRow[]):CatalogRow[]{
   const latest=new Map<string,CatalogRow>();
   for(const r of rows){
@@ -44,6 +49,10 @@ export function recentTierRows(rows:CatalogRow[]):CatalogRow[]{
   }
   return [...latest.values()].filter(r=>r.referenceDate===newest.get(`${r.gtin}|${r.channelCode}`));
 }
+/**
+ * Melhor preço vigente de cada unidade para a quantidade pedida. Faixas de atacado só valem
+ * quando quantidade >= quantidade_minima. Resultado em ordem crescente de preço (centavos).
+ */
 export function currentQuotes(rows:CatalogRow[],gtin:string,quantity:number):CatalogRow[]{
   const channels=new Map<string,CatalogRow[]>();
   for(const r of recentTierRows(rows)){
@@ -53,6 +62,7 @@ export function currentQuotes(rows:CatalogRow[],gtin:string,quantity:number):Cat
   return [...channels.values()].map(offers=>offers.sort((a,b)=>toCents(a.price)-toCents(b.price)||b.minimumQuantity-a.minimumQuantity||b.referenceDate.localeCompare(a.referenceDate))[0])
     .sort((a,b)=>toCents(a.price)-toCents(b.price)||a.channelName.localeCompare(b.channelName,'pt-BR'));
 }
+/** Cartão do catálogo: ofertas por unidade, a mais barata e a diferença entre a maior e a menor. */
 export function compareCatalogItem(rows:CatalogRow[],gtin:string,quantity:number){
   const quotes=currentQuotes(rows,gtin,quantity);
   const product=rows.find(r=>r.gtin===gtin);
@@ -63,6 +73,10 @@ export function compareCatalogItem(rows:CatalogRow[],gtin:string,quantity:number
     savings: min&&max ? money((toCents(max.price)-toCents(min.price))*quantity):null,
     storesCount:quotes.length};
 }
+/**
+ * Lista inteira: total por unidade (apenas unidades que têm TODOS os itens), itens faltantes
+ * e a "compra dividida" (cada item onde é mais barato). Somas em centavos inteiros.
+ */
 export function compareBasket(rows:CatalogRow[],basket:BasketLine[]){
   const catalog=new Map<string,CatalogRow>();
   for(const r of rows)if(!catalog.has(r.gtin))catalog.set(r.gtin,r);
@@ -103,7 +117,9 @@ export function compareBasket(rows:CatalogRow[],basket:BasketLine[]){
     note:'Referências de catálogos online, não preços atuais garantidos em lojas físicas. As somas não incluem frete ou disponibilidade.'};
 }
 const norm=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\b(pacote|pct|unidade|unid)\b/g,' ').replace(/[^a-z0-9]+/g,' ').trim();
+/** Palavras normalizadas de um nome (sem acento, sem "pacote/unidade"), usadas na similaridade. */
 export function normalizedTokens(value:string):string[]{return [...new Set(norm(value).split(' ').filter(v=>v.length>1))];}
+/** Medida da embalagem em unidade base: "1,5 kg" → "1500g", "2 L" → "2000ml". */
 export function normalizeMeasure(text:string):string|null {
   const cleaned=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const m=cleaned.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(kg|g|gramas?|l|ml|litros?)\b/);
@@ -112,6 +128,10 @@ export function normalizeMeasure(text:string):string|null {
   const u=m[2];
   return u==='kg'||u==='g'||u.startsWith('gram')?`${Math.round(n*(u==='kg'?1000:1))}g`:`${Math.round(n*(u==='l'||u.startsWith('litro')?1000:1))}ml`;
 }
+/**
+ * Similaridade (Jaccard) entre nomes de produtos para SUGESTÃO manual. Marcas ou embalagens
+ * diferentes nunca são sugeridas; GTINs diferentes nunca são unidos automaticamente.
+ */
 export function productNameSuggestion(a:{name:string;brand:string;size:string;gtin?:string|null},b:{name:string;brand:string;size:string;gtin?:string|null}){
   if(a.gtin&&b.gtin&&a.gtin===b.gtin)return {score:1,possible:true,reason:'Mesmo código de barras'};
   const brandA=norm(a.brand),brandB=norm(b.brand);

@@ -36,6 +36,7 @@ function purchaseDate(raw: unknown): string {
   return value;
 }
 
+/** Calcula a conferência sem gravar (validações de checkMath viram erro 400). */
 export function preview(lines: unknown) {
   try {
     return computeCheck(lines as CheckLineInput[]);
@@ -44,6 +45,10 @@ export function preview(lines: unknown) {
   }
 }
 
+/**
+ * Grava a conferência. O servidor recalcula tudo a partir dos preços enviados; a chave de
+ * envio (UUID gerado no navegador) torna o envio idempotente: reenviar devolve o mesmo registro.
+ */
 export async function register(userId: number | null, body: Record<string, unknown>) {
   const submissionKey = String(body.submissionKey ?? '');
   if (!UUID.test(submissionKey)) throw badRequest('Identificador de envio inválido.');
@@ -65,6 +70,7 @@ export async function register(userId: number | null, body: Record<string, unkno
   return { id: saved.id, duplicate: saved.duplicate, savedToHistory: userId !== null, network, unit, purchaseDate: date, result };
 }
 
+/** Histórico paginado do usuário com a diferença total de cada conferência e estatísticas. */
 export async function history(userId: number, page: number, perPage: number) {
   const { total, checks: rows } = await checks.checksOfUser(userId, perPage, (page - 1) * perPage);
   return {
@@ -80,6 +86,7 @@ async function owned(userId: number, checkId: number) {
   return check;
 }
 
+/** Uma conferência do usuário com itens, resultado recalculado e lista de anexos. */
 export async function detail(userId: number, checkId: number) {
   const { userId: _owner, ...check } = await owned(userId, checkId);
   const lines = await checks.itemsOfCheck(checkId);
@@ -87,6 +94,7 @@ export async function detail(userId: number, checkId: number) {
   return { check, result: computeCheck(lines), attachments };
 }
 
+/** Exclui a conferência do usuário e apaga do disco os arquivos dos anexos. */
 export async function remove(userId: number, checkId: number) {
   await owned(userId, checkId);
   const files = await checks.attachmentsOfCheck(checkId);
@@ -102,6 +110,10 @@ export function sniffImage(bytes: Buffer): string | null {
   return null;
 }
 
+/**
+ * Anexo privado: tipo conferido pelos bytes do arquivo (sniffImage), até 4 MB e 4 anexos;
+ * o nome em disco é aleatório (o nome original nunca é usado).
+ */
 export async function addAttachment(userId: number, checkId: number, kind: unknown, bytes: Buffer) {
   await owned(userId, checkId);
   if (kind !== 'ETIQUETA' && kind !== 'COMPROVANTE') throw badRequest('Informe se o arquivo é ETIQUETA ou COMPROVANTE.');
@@ -122,6 +134,7 @@ export async function addAttachment(userId: number, checkId: number, kind: unkno
   }
 }
 
+/** Bytes do anexo, somente para o dono da conferência. */
 export async function readAttachment(userId: number, checkId: number, attachmentId: number) {
   await owned(userId, checkId);
   const attachment = await checks.findAttachment(checkId, attachmentId);
@@ -133,6 +146,7 @@ export async function readAttachment(userId: number, checkId: number, attachment
   }
 }
 
+/** Remove um anexo (registro e arquivo). */
 export async function removeAttachment(userId: number, checkId: number, attachmentId: number) {
   await owned(userId, checkId);
   const attachment = await checks.findAttachment(checkId, attachmentId);

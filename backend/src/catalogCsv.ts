@@ -12,6 +12,11 @@ export type CatalogEntry={
   referenceType:'CONSULTA_INDEXADA'|'CONFERENCIA_MANUAL'|'COLETA_AUTOMATICA';notice:string;
 };
 const TEXT_LIMITS=[150,100,40,100,80,150,100];
+/**
+ * Importação de catálogo por CSV (npm run import:catalog). Confere cabeçalho, GTIN com dígito
+ * verificador, preço, quantidade mínima, URL https, data (não futura) e duplicidade antes de
+ * qualquer gravação — um erro em qualquer linha recusa o arquivo inteiro.
+ */
 export function parseCatalogCsv(csv:string,today=new Date()):CatalogEntry[]{
   const lines=parseSemicolonCsv(csv.replace(/^\uFEFF/,''));
   if(!lines.length||lines[0].join('|')!==catalogHeader.join('|'))

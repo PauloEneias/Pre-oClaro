@@ -112,6 +112,11 @@ export function assertSaoLuis(store: AtacadaoStore): void {
     throw new Error(`A loja "${store.name}" fica em ${store.city}/${store.state}, não em São Luís/MA.`);
 }
 
+/**
+ * URL da consulta GraphQL de produtos de UMA unidade (vendedor da loja), paginada por
+ * offset/first. A coleta percorre a ordem A→Z e depois Z→A porque o site limita o número de
+ * páginas por ordenação — assim catálogos maiores que o limite são cobertos por inteiro.
+ */
 export function buildProductsQueryUrl(
   store: AtacadaoStore,
   offset: number,
@@ -188,6 +193,10 @@ export function parseAtacadaoProductsPage(
   return { totalCount, items, foreignOffers };
 }
 
+/**
+ * URL da API de catálogo (VTEX catalog_system) que devolve o EAN de vários SKUs de uma vez.
+ * O mapeamento SKU→GTIN fica em mercado_sku_gtin para não repetir a consulta a cada coleta.
+ */
 export function buildEanLookupUrl(skus: string[]): string {
   const filters = skus.map((sku) => `fq=skuId:${encodeURIComponent(sku)}`).join('&');
   return `${ATACADAO_ORIGIN}/io/api/catalog_system/pub/products/search?${filters}&_from=0&_to=${Math.max(0, skus.length - 1)}`;

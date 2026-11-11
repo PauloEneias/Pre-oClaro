@@ -1,3 +1,9 @@
+/**
+ * MERCADOS PRÓXIMOS (rota /estabelecimentos).
+ * Usa a localização (GPS ou bairro aproximado) para listar lojas reais do OpenStreetMap
+ * dentro do raio escolhido, com distância em linha reta, mapa e link para a lista de
+ * ofertas de cada loja. Lojas vêm de GET /api/stores/nearby (com cache no MySQL).
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, LocateFixed, MapPin, Navigation2, Search, AlertCircle, RefreshCw, PauseCircle, ExternalLink, Radio, Tag, List, Map as MapIcon } from 'lucide-react';

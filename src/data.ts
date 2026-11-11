@@ -1,3 +1,8 @@
+/**
+ * DADOS ESTÁTICOS DE DEMONSTRAÇÃO e formatação de moeda.
+ * `products` alimenta apenas o modo "Demonstração" e as vitrines ilustrativas — nunca é
+ * misturado aos preços coletados. `brl` formata valores em reais no padrão pt-BR.
+ */
 export type Category = 'Mercados' | 'Farmácias' | 'Eletrônicos' | 'Postos';
 export type Product = {
   id: number;

@@ -222,6 +222,7 @@ export const CATEGORIES = [
   { id: 'outros', label: 'Outros' },
 ] as const;
 export type CategoryId = (typeof CATEGORIES)[number]['id'];
+/** Confere se um texto é id de categoria (validação do parâmetro `category`). */
 export const isCategory = (value: string): value is CategoryId => CATEGORIES.some((c) => c.id === value);
 export const categoryLabel = (id: CategoryId): string => CATEGORIES.find((c) => c.id === id)?.label ?? 'Outros';
 

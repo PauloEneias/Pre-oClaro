@@ -1,3 +1,11 @@
+/**
+ * PÁGINA INICIAL (rota "/").
+ * Vitrine editorial: pesquisa principal (envia para /comparar?q=…), atalhos para o catálogo
+ * e para os mercados próximos, e blocos ilustrativos. Os preços desenhados aqui são EXEMPLOS
+ * visuais (componentes HeroComparison/PriceHistory), não dados do banco — os dados reais
+ * aparecem em /catalogo e /comparar.
+ * Decisão de produto: Farmácias, Eletrônicos e Postos não aparecem na Home.
+ */
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -62,6 +70,7 @@ function PhoneMockups(){return <div className="p6-phone-scene" aria-label="Prév
   <div className="p6-phone p6-phone-two"><div className="p6-phone-island"/><div className="p6-phone-screen"><div className="p6-phone-brand"><TrendingUp size={12}/> Histórico de preço</div><h4>Arroz Branco 5 kg</h4><small>6 meses</small><svg viewBox="0 0 180 100"><path d="M5 25 Q30 55 60 52 T115 64 T175 76" fill="none" stroke="#76922d" strokeWidth="2.5"/><circle cx="175" cy="76" r="4" fill="#668a19"/></svg><span className="p6-phone-price">R$ 22,90</span></div></div>
 </div>}
 
+/** Componente da Home. A pesquisa navega para a página de comparação com o termo na URL. */
 export default function HomePage(){
   const navigate = useNavigate();
   const [search,setSearch] = useState('');

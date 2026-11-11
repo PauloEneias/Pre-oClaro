@@ -1,3 +1,12 @@
+/**
+ * CONTEXTO DE GEOLOCALIZAÇÃO.
+ * - requestLocation: uma leitura do GPS (navigator.geolocation.getCurrentPosition).
+ * - startTracking/stopTracking: acompanhamento contínuo (watchPosition), sempre encerrado
+ *   ao desmontar para não drenar bateria.
+ * - chooseNeighborhood: alternativa aproximada sem GPS (bairros de São Luís).
+ * Privacidade: a posição fica só na memória da aba; nunca vai para o localStorage.
+ * O GPS exige contexto seguro (HTTPS ou localhost); fora disso o erro é explicado ao usuário.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 export type UserLocation = {
@@ -31,6 +40,7 @@ type LocationState = {
 };
 const Context = createContext<LocationState | null>(null);
 
+/** Traduz os códigos da API de geolocalização (1 negado, 2 indisponível, 3 tempo esgotado). */
 function geolocationError(error: GeolocationPositionError) {
   const messages: Record<number,string> = {
     1:'Você não autorizou a localização. Confira as permissões do navegador ou escolha um bairro.',
@@ -43,6 +53,10 @@ function isAvailable() {
   return typeof navigator !== 'undefined' && 'geolocation' in navigator && window.isSecureContext;
 }
 
+/**
+ * Provedor da localização. `requestId` descarta respostas antigas do GPS quando o usuário
+ * pede de novo antes da primeira terminar (evita condição de corrida).
+ */
 export function LocationProvider({ children }: {children: ReactNode}) {
   // A posição do usuário existe somente nesta aba. Nunca fica no localStorage.
   const [location,setLocation] = useState<UserLocation|null>(null);
@@ -140,6 +154,7 @@ export function LocationProvider({ children }: {children: ReactNode}) {
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
+/** Hook de acesso à localização atual, ao status ('idle' | 'loading' | 'ready' | 'error') e às ações. */
 export function useUserLocation() {
   const state=useContext(Context);
   if(!state)throw new Error('useUserLocation deve ser usado dentro de LocationProvider');

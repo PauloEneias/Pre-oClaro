@@ -19,8 +19,10 @@ declare module 'fastify' {
   }
 }
 
+/** Token bruto do cookie (o banco conhece apenas o SHA-256 dele). */
 export const sessionToken = (request: FastifyRequest): string | undefined => request.cookies?.[env.cookie.name];
 
+/** Cookie HttpOnly, restrito a /api, com SameSite e Secure conforme o ambiente (.env). */
 export function setSessionCookie(reply: FastifyReply, token: string): void {
   reply.setCookie(env.cookie.name, token, {
     httpOnly: true, secure: env.cookie.secure, sameSite: env.cookie.sameSite, path: '/api',
@@ -28,15 +30,18 @@ export function setSessionCookie(reply: FastifyReply, token: string): void {
   });
 }
 
+/** Remove o cookie no navegador (logout). */
 export function clearSessionCookie(reply: FastifyReply): void {
   reply.clearCookie(env.cookie.name, { httpOnly: true, secure: env.cookie.secure, sameSite: env.cookie.sameSite, path: '/api' });
 }
 
+/** Usuário da sessão, consultado uma vez por requisição (memorizado em request.sessionUser). */
 export async function currentUser(request: FastifyRequest): Promise<PublicUser | null> {
   if (request.sessionUser === undefined) request.sessionUser = await userFromToken(sessionToken(request));
   return request.sessionUser;
 }
 
+/** Igual a currentUser, mas responde 401 quando não há sessão válida. */
 export async function requireUser(request: FastifyRequest): Promise<PublicUser> {
   const user = await currentUser(request);
   if (!user) throw unauthorized();

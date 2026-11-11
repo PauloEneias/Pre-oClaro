@@ -1,3 +1,13 @@
+/**
+ * CONTEXTO DAS LISTAS DE COMPRAS (várias listas por pessoa).
+ * Dois modos, com a mesma interface para as telas:
+ *  - VISITANTE: listas locais no localStorage (`precoclaro-listas-v2`), ids "g-…".
+ *    A versão antiga de lista única (`precoclaro-basket-v1`) é migrada automaticamente.
+ *  - CONTA: listas no servidor (MySQL, tabelas listas/lista_itens) via /api/lists.
+ *    A comparação de preços da lista aberta é calculada no servidor.
+ * Ao entrar na conta, as listas locais podem ser importadas sem duplicar itens.
+ * Cada item é identificado pelo GTIN; quantidades ficam entre 1 e 999.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as api from '../api';
 import type { BasketCompareResponse, ListDetail, ShoppingList } from '../api';
@@ -73,6 +83,7 @@ const fromDetail = (d: ListDetail): BasketEntry[] =>
   d.items.map(i => ({ gtin: i.gtin, quantity: i.quantity, name: i.name, brand: i.brand, size: i.size, purchased: i.purchased }));
 
 /** Lê as listas locais; a cesta única da versão anterior vira a lista "Minha lista". */
+/** Lê as listas locais com validação (dados corrompidos ou de versão antiga não quebram a tela). */
 function restore(): GuestList[] {
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? 'null');
@@ -87,6 +98,10 @@ function restore(): GuestList[] {
   } catch { return []; }
 }
 
+/**
+ * Provedor das listas. `sequence` garante que só a resposta da operação mais recente altere
+ * a lista aberta (respostas atrasadas são ignoradas).
+ */
 export function BasketProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [guest, setGuest] = useState<GuestList[]>(restore);

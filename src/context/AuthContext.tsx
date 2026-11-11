@@ -1,3 +1,9 @@
+/**
+ * CONTEXTO DE AUTENTICAÇÃO.
+ * Ao abrir o site pergunta ao servidor quem está logado (GET /api/auth/me). A sessão é um
+ * cookie HttpOnly `pc_sessao`: o JavaScript não lê nem guarda token. login/register/logout
+ * chamam a API e atualizam `user`; as demais telas reagem a essa mudança.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import * as api from '../api';
 import type { User } from '../api';
@@ -17,6 +23,7 @@ type AuthState = {
 };
 const Context = createContext<AuthState | null>(null);
 
+/** Provedor: carrega o usuário atual uma vez e expõe login, cadastro e saída. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
+/** Hook de acesso ao contexto; falha cedo se usado fora do AuthProvider. */
 export function useAuth() {
   const context = useContext(Context);
   if (!context) throw new Error('AuthProvider ausente');

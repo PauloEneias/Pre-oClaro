@@ -68,6 +68,7 @@ export async function findNearbyStores(location: LocationFilter): Promise<StoreR
   }));
 }
 
+/** Nome da loja (cabeçalho do filtro "ofertas desta loja"). */
 export async function findStoreName(id: number): Promise<string | null> {
   const [rows] = await pool.execute<RowDataPacket[]>('SELECT nome FROM estabelecimentos WHERE id=? AND ativo=TRUE', [id]);
   return rows[0] ? String(rows[0].nome) : null;

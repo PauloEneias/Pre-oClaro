@@ -1,3 +1,13 @@
+/**
+ * ROTEAMENTO DA APLICAÇÃO (React Router).
+ * Camada VIEW do MVC no navegador. A ordem dos provedores importa:
+ *  - AuthProvider vem antes de BasketProvider, porque as listas dependem de saber se há
+ *    usuário logado (listas da conta no servidor × listas locais do visitante);
+ *  - LocationProvider guarda a posição só na memória da aba (nunca em localStorage);
+ *  - AddToListProvider oferece o modal "Adicionar à lista" a qualquer página.
+ * A Home fica fora do PageShell (layout próprio); as demais páginas usam o layout comum.
+ * Rotas desconhecidas voltam para a Home.
+ */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './HomePage';
 import { ResultsPage, ProductPage, CheckoutPage, StoresPage, ListsPage, ProfilePage, AuthPage } from './pages';
@@ -8,6 +18,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AddToListProvider } from './components/AddToList';
 import CatalogPage from './pages/CatalogPage';
 
+/** Árvore de provedores de contexto + tabela de rotas. */
 export default function App() {
   return <BrowserRouter><AuthProvider><LocationProvider><BasketProvider><AddToListProvider>
     <Routes>

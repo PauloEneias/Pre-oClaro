@@ -1,3 +1,12 @@
+/**
+ * CONFERIR CAIXA (rota /conferir).
+ * O usuário registra, para cada item, o preço da PRATELEIRA e o cobrado no CAIXA; a tela
+ * mostra a diferença por item e no total (CAIXA_MAIOR, CAIXA_MENOR ou IGUAL).
+ * - Valores tratados em centavos inteiros (função cents) para não haver erro de arredondamento.
+ * - Com login, a conferência pode ser salva com fotos (etiqueta/comprovante, até 4 MB,
+ *   JPEG/PNG/WebP) e aparece no histórico pessoal; o servidor recalcula tudo e impede envio duplo.
+ * - A loja é escolhida entre as unidades que existem no catálogo (GET /api/catalog/channels).
+ */
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, AlertTriangle, ArrowRight, Camera, CheckCircle2, MinusCircle, Plus, ReceiptText, Search, Trash2, X } from 'lucide-react';
@@ -15,6 +24,7 @@ type Suggestion = { gtin: string; name: string };
 const today = () => new Date(Date.now() - 3 * 3_600_000).toISOString().slice(0, 10);
 const blank = (key: number): Row => ({ key, gtin: null, productName: '', shelfPrice: '', checkoutPrice: '', quantity: '1' });
 /** Mesma regra do servidor: aceita 12,90 / 12.90 / 1.234,56. Devolve centavos ou null. */
+/** "12,90" → 1290. Retorna null para texto inválido; a validação final é do servidor. */
 function cents(raw: string): number | null {
   let text = raw.trim();
   if (/^\d{1,3}(\.\d{3})+,\d{1,2}$/.test(text)) text = text.replace(/\./g, '');
@@ -28,6 +38,7 @@ const percent = (value: number | null) => value === null ? '' : `${value > 0 ? '
 const statusClass: Record<CheckStatus, string> = { CAIXA_MAIOR: 'is-higher', CAIXA_MENOR: 'is-lower', IGUAL: 'is-equal' };
 const MAX_FILE = 4 * 1024 * 1024;
 
+/** Formulário de conferência, resultado calculado e histórico (quando logado). */
 export default function CheckoutPage() {
   const { user } = useAuth();
   const nextKey = useRef(2);
@@ -254,6 +265,7 @@ export default function CheckoutPage() {
   </div>;
 }
 
+/** Linha do histórico pessoal com opção de excluir a conferência. */
 function HistoryRow({ check, onDeleted }: { check: api.CheckSummary; onDeleted: () => void }) {
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof api.getCheck>> | null>(null);
   const [open, setOpen] = useState(false);

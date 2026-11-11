@@ -155,6 +155,7 @@ export function assertMateusMarketInSaoLuis(market: MateusMarket, detail: Mateus
     throw new Error(`A unidade "${market.name}" fica em ${detail.city}/${detail.state}, não em São Luís/MA.`);
 }
 
+/** Departamentos → seções → categorias do site (árvore usada para descer quando a listagem vem cortada). */
 export function parseMateusDepartments(payload: unknown): MateusDepartment[] {
   const list = (payload as { departaments?: unknown })?.departaments;
   if (!Array.isArray(list)) throw new Error('Departamentos do Mateus Mais em formato inesperado.');
@@ -205,6 +206,11 @@ export function parseMateusProduct(raw: unknown): MateusProduct | null {
   };
 }
 
+/**
+ * Lê uma página de produtos da API do site: preço, preço de lista (promoção), venda em
+ * múltiplos (vira quantidade mínima), EAN e o indicador `is_bulk` (vendido por peso), que
+ * depois exclui o item da comparação.
+ */
 export function parseMateusListing(payload: unknown): {
   products: MateusProduct[];
   page: number;
@@ -244,6 +250,7 @@ export function buildMateusListingBody(marketId: string, scope: MateusScope, pag
   };
 }
 
+/** Link público do produto na unidade (fonte exibida ao usuário). */
 export function mateusProductUrl(marketId: string, productId: string): string {
   return `${MATEUS_SITE}/produtos/${marketId}/${productId}`;
 }
@@ -307,6 +314,12 @@ export class MateusNotAuthorizedError extends Error {
   }
 }
 
+/**
+ * Coleta das unidades de São Luís. Só roda com MATEUS_SYNC_ENABLED=true (os Termos de Uso do
+ * site vedam scripts de obtenção de dados; ligar é decisão do responsável). Usa o cliente
+ * "educado" (intervalo entre requisições e novas tentativas limitadas) e registra consultas
+ * que continuaram cortadas pelo site, sem invalidar o restante.
+ */
 export async function collectMateusMais(options: {
   client: PoliteClient;
   authorized: boolean;
@@ -429,6 +442,7 @@ export async function collectMateusMais(options: {
   return { markets, offers, stats };
 }
 
+/** Texto de procedência gravado com a oferta (unidade, faixa de quantidade e promoção). */
 export function mateusNotice(offer: CollectedOffer): string {
   const promo = offer.listPrice ? ` Promoção: de ${brl(offer.listPrice)} por ${brl(offer.price)}.` : '';
   const tier =

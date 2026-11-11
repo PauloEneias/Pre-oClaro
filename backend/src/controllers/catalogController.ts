@@ -21,6 +21,13 @@ const text = (value: string | undefined, max: number, label: string) => {
   return result;
 };
 
+/**
+ * Rotas públicas de leitura (GET), agrupadas por assunto:
+ *  saúde (/api/health, /api/health/live), lojas próximas (/api/stores/nearby),
+ *  ofertas geolocalizadas (/api/products/search, /api/products/:id),
+ *  preços online por UF (/api/market/prices) e catálogo comparável (/api/catalog/*).
+ * Cada rota valida a querystring e devolve 400 com mensagem clara quando algo é inválido.
+ */
 export function registerCatalogRoutes(app: FastifyInstance): void {
   // ---- saúde ----
   app.get('/api/health', async (_request, reply) => {
@@ -33,6 +40,7 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
   });
   /** Só diz que o processo está de pé (sondas de hospedagem); não toca no banco. */
   app.get('/api/health/live', async () => ({ status: 'ok' }));
+  /** Cobertura de fotos (produtos com e sem imagem confiável). */
   app.get('/api/stats/images', async () => {
     const coverage = await imageCoverage();
     return { ...coverage, withoutImage: coverage.products - coverage.withImage };
@@ -69,6 +77,7 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     );
   });
 
+  /** Detalhe de um produto: ofertas nas lojas do mapa e histórico realmente observado. */
   app.get<{ Params: { id: string }; Querystring: Query }>('/api/products/:id', async (request) =>
     products.detail(
       valid(() => parseProductId(request.params.id)), valid(() => parsePriceMode(request.query.mode)),
@@ -76,6 +85,7 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     )
   );
 
+  /** Preços digitais por UF de um EAN (Data Market), sem valor de prateleira. */
   app.get<{ Querystring: Query }>('/api/market/prices', async (request) => {
     const ean = String(request.query.ean ?? '').trim();
     if (!gtinValid(ean)) throw badRequest('Informe um EAN/GTIN válido.');
@@ -94,6 +104,10 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     return catalog.documentedPrices(q, quantity, page, perPage);
   });
 
+  /**
+   * Catálogo paginado. Parâmetros: q, network | compare=1, quantity, sort
+   * (relevance | price | recent | name), category, related=1, page, perPage.
+   */
   app.get<{ Querystring: Query }>('/api/catalog/items', async (request) => {
     const q = text(request.query.q, 100, 'Filtro');
     const network = text(request.query.network, 100, 'Filtro');
@@ -115,6 +129,7 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
   /** Categorias internas do catálogo (classificação pelo núcleo do nome do produto). */
   app.get('/api/catalog/categories', async () => ({ categories: CATEGORIES }));
 
+  /** Comparação de um GTIN entre todas as unidades. */
   app.get<{ Querystring: Query }>('/api/catalog/compare', async (request) => {
     const gtin = String(request.query.gtin ?? '').trim();
     if (!gtinValid(gtin)) throw badRequest('Código de barras inválido.');
@@ -123,11 +138,13 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     return result;
   });
 
+  /** Compara uma cesta enviada no corpo (visitante sem conta). Leitura pura: não grava nada. */
   app.post<{ Body: unknown }>('/api/catalog/basket/compare', async (request) => {
     const body = request.body as Record<string, unknown> | null;
     return catalog.compareBasketLines(valid(() => validateBasket(body?.items)));
   });
 
+  /** Nomes parecidos (sugestão manual; nunca une GTINs diferentes). */
   app.get<{ Querystring: Query }>('/api/catalog/similar', async (request) => {
     const q = String(request.query.q ?? '').trim();
     const brand = String(request.query.brand ?? '').trim();
@@ -136,5 +153,6 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     return catalog.similar({ q, brand, size, gtin: String(request.query.gtin ?? '').trim() });
   });
 
+  /** Redes e unidades existentes no catálogo (seletor do Conferir Caixa). */
   app.get('/api/catalog/channels', async () => ({ channels: await catalog.channels() }));
 }

@@ -1,3 +1,7 @@
+/**
+ * LAYOUT COMUM das páginas internas: navegação (SiteNav), conteúdo da rota (<Outlet />) e
+ * rodapé. A cada troca de rota a página volta ao topo, como numa navegação tradicional.
+ */
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import SiteNav from './SiteNav';

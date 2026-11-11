@@ -20,6 +20,11 @@ import { registerCheckRoutes } from './controllers/checkController.js';
 import { registerListRoutes } from './controllers/listController.js';
 import { MAX_ATTACHMENT_BYTES } from './services/checkService.js';
 
+/**
+ * Cria e configura a instância Fastify. Ordem: CORS (somente origens do .env, com cookies),
+ * cookies, multipart (limite de tamanho dos anexos), cabeçalhos de segurança em toda resposta,
+ * rotas e, por último, os tratadores de 404 e de erro — que nunca expõem detalhes internos.
+ */
 export async function buildApp(options: { logger?: boolean } = {}): Promise<FastifyInstance> {
   const app = Fastify({
     // Atrás do proxy da hospedagem o IP real e o protocolo vêm nos cabeçalhos X-Forwarded-*.

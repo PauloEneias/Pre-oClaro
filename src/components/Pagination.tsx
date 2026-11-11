@@ -1,6 +1,10 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 /** Páginas a mostrar: primeira, última, vizinhas da atual e reticências. Ex.: 1 … 4 5 [6] 7 8 … 63 */
+/**
+ * Janela de páginas numeradas com reticências: sempre a primeira, a última e as vizinhas da
+ * atual. Ex.: página 7 de 20 → [1, 'gap', 6, 7, 8, 'gap', 20]. Função pura (testável).
+ */
 export function pageWindow(current: number, total: number): (number | 'gap')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
   // Perto das pontas mostra mais números, para a barra não mudar de tamanho a cada clique.
@@ -16,6 +20,11 @@ export function pageWindow(current: number, total: number): (number | 'gap')[] {
 /**
  * Paginação numerada. Totalmente no servidor: este componente só diz qual página pedir.
  * Navegável por teclado (são botões), com a página atual anunciada a leitores de tela.
+ */
+/**
+ * PAGINAÇÃO NUMERADA controlada pelo pai. A página e o tamanho ficam na URL das telas
+ * (?pagina=, ?por=), então Voltar/Avançar do navegador funcionam. `total` e `pages`
+ * vêm do servidor — a contagem é feita no banco, não no navegador.
  */
 export default function Pagination({ page, pages, total, perPage, perPageOptions, onPage, onPerPage, label = 'resultados', disabled = false }: {
   page: number; pages: number; total: number; perPage: number;

@@ -23,6 +23,9 @@ CALL pc_migrar_ofertas();
 DROP PROCEDURE pc_migrar_ofertas;
 
 -- Só registra observações efetivamente importadas; NUNCA gera histórico fictício.
+-- HISTÓRICO DE PREÇOS — uma linha por observação de uma oferta (1 oferta : N observações).
+--  UNIQUE(oferta_id, observado_em) impede gravar a mesma observação duas vezes.
+--  O índice (oferta_id, observado_em) atende ao gráfico/lista do histórico em ordem de data.
 CREATE TABLE IF NOT EXISTS historico_precos (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   oferta_id INT UNSIGNED NOT NULL,

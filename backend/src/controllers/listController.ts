@@ -7,6 +7,16 @@ type Body = Record<string, unknown>;
 type ListParams = { id: string };
 type ItemParams = { id: string; gtin: string };
 
+/**
+ * Rotas /api/lists (todas exigem login e passam pelo csrfGuard quando alteram dados):
+ *  GET    /api/lists                    listas do usuário
+ *  POST   /api/lists                    cria lista
+ *  GET    /api/lists/:id                itens + comparação calculada no servidor
+ *  PATCH  /api/lists/:id                renomeia      ·  DELETE /api/lists/:id  exclui
+ *  POST   /api/lists/:id/items          adiciona itens (mode=add soma; mode=max importa sem duplicar)
+ *  PATCH  /api/lists/:id/items/:gtin    quantidade / comprado
+ *  DELETE /api/lists/:id/items/:gtin    remove um item  ·  DELETE /api/lists/:id/items  esvazia
+ */
 export function registerListRoutes(app: FastifyInstance): void {
   app.register(async (scope) => {
     scope.addHook('preHandler', csrfGuard);

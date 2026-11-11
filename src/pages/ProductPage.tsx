@@ -1,3 +1,9 @@
+/**
+ * DETALHE DO PRODUTO (rota /produto/:id).
+ * Mostra todas as ofertas do MESMO produto (mesmo GTIN) nas lojas do mapa, o histórico de
+ * preços realmente observado (nunca interpolado) e, quando há GTIN, os preços online por UF.
+ * Modo e quantidade chegam pela URL (?mode=, ?quantity=).
+ */
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, AlertCircle, Clock3, MapPin, ExternalLink, TrendingDown, Plus } from 'lucide-react';

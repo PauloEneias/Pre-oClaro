@@ -13,6 +13,8 @@
 -- exigir log_bin_trust_function_creators=1; por isso este arquivo é opcional.
 USE precoclaro;
 
+-- vw_preco_atual: para cada (gtin, canal, faixa) pega a observação de MAIOR coletado_em.
+-- A subconsulta agrupada encontra a data mais recente e o JOIN traz a linha completa dela.
 CREATE OR REPLACE VIEW vw_preco_atual AS
 SELECT o.gtin, o.produto_nome, o.rede, o.canal_codigo, o.canal_nome, o.quantidade_minima,
        o.preco, o.preco_lista, o.fonte, o.fonte_url, o.coletado_em, o.confirmado_em
@@ -32,6 +34,8 @@ BEGIN
 END//
 DELIMITER ;
 
+-- vw_comparacao_redes: pivota os preços unitários (quantidade_minima = 1) por rede usando
+-- MIN(CASE WHEN rede = …) e mantém só GTINs com preço nas duas redes.
 CREATE OR REPLACE VIEW vw_comparacao_redes AS
 SELECT t.gtin, t.produto, t.atacadao, t.mateus_mais,
        ABS(t.atacadao - t.mateus_mais) AS diferenca,
@@ -46,6 +50,7 @@ FROM (SELECT gtin, MIN(produto_nome) AS produto,
       GROUP BY gtin) t
 WHERE t.atacadao IS NOT NULL AND t.mateus_mais IS NOT NULL;
 
+-- sp_limpar_sessoes: manutenção (CALL sp_limpar_sessoes()) — mesma limpeza feita pela API.
 DROP PROCEDURE IF EXISTS sp_limpar_sessoes;
 DELIMITER //
 CREATE PROCEDURE sp_limpar_sessoes()
@@ -56,6 +61,8 @@ BEGIN
 END//
 DELIMITER ;
 
+-- Triggers BEFORE INSERT/UPDATE: normalizam o e-mail no próprio banco, reforçando a
+-- regra da aplicação e a chave única uq_usuarios_email.
 DROP TRIGGER IF EXISTS trg_usuarios_email_bi;
 DROP TRIGGER IF EXISTS trg_usuarios_email_bu;
 DELIMITER //

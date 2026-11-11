@@ -1,6 +1,11 @@
 -- PreçoClaro: otimização para pesquisa de catálogos extensos.
 -- Execute DEPOIS de 06-catalogos-documentados.sql. Não apaga registros.
 USE precoclaro;
+-- Índices extras do catálogo:
+--  ix_catalogo_rede_gtin (uf, rede, gtin): filtros "Somente Atacadão/Mateus" e comparação.
+--  ix_catalogo_channel_tier_date (gtin, canal_codigo, quantidade_minima, referencia_em):
+--  achar a referência mais recente de cada faixa (ROW_NUMBER / MAX por grupo).
+-- A procedure confere o information_schema antes de criar, então o script é reexecutável.
 DROP PROCEDURE IF EXISTS pc_catalog_indexes;
 DELIMITER //
 CREATE PROCEDURE pc_catalog_indexes()

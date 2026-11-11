@@ -1,3 +1,7 @@
+/**
+ * Cartão ILUSTRATIVO de comparação de preços (mercados e valores de exemplo).
+ * Possui aria-label que deixa claro ao leitor de tela que se trata de exemplo.
+ */
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Bookmark, Check, MapPin, TrendingDown } from 'lucide-react';
 import OliveArtwork from './OliveArtwork';

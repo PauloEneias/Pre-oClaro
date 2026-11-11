@@ -1,3 +1,10 @@
+/**
+ * BARRA DE NAVEGAÇÃO responsiva.
+ * - Desktop: links e conta visíveis; abaixo de 1121 px os links vão para um menu.
+ * - O menu fecha ao trocar de rota e com a tecla Esc; a conta (entrar/perfil/sair)
+ *   fica dentro do menu no celular.
+ * O estado de login vem do AuthContext (cookie de sessão HttpOnly, nunca lido pelo JS).
+ */
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { CircleUserRound, LogOut, MapPin, Menu, X } from 'lucide-react';

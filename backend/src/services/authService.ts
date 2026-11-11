@@ -20,16 +20,19 @@ const sha256 = (text: string) => createHash('sha256').update(text).digest('hex')
 /** Hash de comparação usado quando o e-mail não existe, para o tempo de resposta ser o mesmo. */
 const DUMMY_HASH = bcrypt.hashSync('precoclaro-sem-usuario', 10);
 
+/** E-mail aparado, em minúsculas e com formato válido (até 190 caracteres). */
 export function normalizeEmail(raw: unknown): string {
   const email = String(raw ?? '').trim().toLowerCase();
   if (email.length > 190 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw badRequest('Informe um e-mail válido.');
   return email;
 }
+/** Nome com espaços normalizados, de 2 a 120 caracteres. */
 export function validName(raw: unknown): string {
   const name = String(raw ?? '').replace(/\s+/g, ' ').trim();
   if (name.length < 2 || name.length > 120) throw badRequest('Informe seu nome (2 a 120 caracteres).');
   return name;
 }
+/** Senha de 8 a 72 bytes (limite do bcrypt), recusando sequências de um só caractere. */
 export function validPassword(raw: unknown): string {
   if (typeof raw !== 'string') throw badRequest('Informe a senha.');
   if (raw.length < 8) throw badRequest('A senha deve ter ao menos 8 caracteres.');
@@ -46,6 +49,10 @@ async function openSession(userId: number): Promise<string> {
   return token;
 }
 
+/**
+ * Cadastro: valida, impede e-mail repetido (também pela chave única do banco, caso dois
+ * cadastros cheguem juntos), grava o hash bcrypt e já abre a sessão.
+ */
 export async function register(input: { name: unknown; email: unknown; password: unknown }): Promise<{ user: PublicUser; token: string }> {
   const name = validName(input.name);
   const email = normalizeEmail(input.email);
@@ -64,6 +71,10 @@ export async function register(input: { name: unknown; email: unknown; password:
   return { user: publicUser(user!), token: await openSession(id) };
 }
 
+/**
+ * Login com limite de tentativas (5 falhas por e-mail+IP ou 30 por IP em 15 min). Quando o
+ * e-mail não existe, compara com um hash fictício para o tempo de resposta não denunciar isso.
+ */
 export async function login(input: { email: unknown; password: unknown }, ip: string): Promise<{ user: PublicUser; token: string }> {
   const email = normalizeEmail(input.email);
   if (typeof input.password !== 'string' || !input.password) throw badRequest('Informe a senha.');
@@ -91,15 +102,18 @@ export async function userFromToken(token: string | undefined): Promise<PublicUs
   return user ? publicUser(user) : null;
 }
 
+/** Apaga a sessão no banco (o cookie é limpo pelo controller). */
 export async function logout(token: string | undefined): Promise<void> {
   if (token) await users.deleteSession(sha256(token));
 }
 
+/** Troca o nome exibido. */
 export async function updateProfile(userId: number, input: { name: unknown }): Promise<PublicUser> {
   await users.updateUserName(userId, validName(input.name));
   return publicUser((await users.findUserById(userId))!);
 }
 
+/** Troca a senha conferindo a atual e encerra as demais sessões do usuário. */
 export async function changePassword(userId: number, token: string, input: { currentPassword: unknown; newPassword: unknown }): Promise<void> {
   const user = await users.findUserById(userId);
   if (!user || typeof input.currentPassword !== 'string' || !(await bcrypt.compare(input.currentPassword, user.passwordHash)))

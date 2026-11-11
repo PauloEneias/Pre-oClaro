@@ -8,6 +8,7 @@ export class HttpError extends Error {
     this.name = 'HttpError';
   }
 }
+/** Atalhos dos erros mais comuns. A mensagem vai para o usuário; detalhes internos nunca. */
 export const badRequest = (message: string) => new HttpError(400, message);
 export const unauthorized = (message = 'Entre na sua conta para continuar.') => new HttpError(401, message);
 export const forbidden = (message = 'Requisição não autorizada.') => new HttpError(403, message);

@@ -1,6 +1,10 @@
 // Funções puras para testar nossa validação sem depender do MySQL.
 export type LocationFilter = { lat: number; lon: number; radiusKm: number };
 
+/**
+ * Lê lat, lon e radiusKm da querystring. Sem coordenadas → null (busca sem filtro de
+ * distância). Valida intervalo geográfico e raio de 0 a 30 km.
+ */
 export function parseLocationFilter(query: Record<string, unknown>): LocationFilter | null {
   const latMissing = query.lat === undefined || query.lat === '';
   const lonMissing = query.lon === undefined || query.lon === '';

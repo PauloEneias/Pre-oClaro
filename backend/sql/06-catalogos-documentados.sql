@@ -3,6 +3,11 @@
 -- Execute APÓS 01, 03, 04 e 05. Não apaga nem altera tabelas anteriores.
 USE precoclaro;
 
+-- CATÁLOGO COMPARÁVEL — base das telas /catalogo, /listas e da comparação entre redes.
+--  Uma linha = preço de um GTIN numa unidade (canal_codigo) para uma faixa de quantidade
+--  (quantidade_minima: 1 = unitário, maior que 1 = atacado ou venda em múltiplos) numa data.
+--  UNIQUE(gtin, canal_codigo, quantidade_minima, referencia_em): uma referência por dia.
+--  Índice (uf, gtin, referencia_em) atende à busca por produto. Sempre com fonte_url e data.
 CREATE TABLE IF NOT EXISTS catalogo_ofertas_documentadas (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   gtin VARCHAR(14) NOT NULL,

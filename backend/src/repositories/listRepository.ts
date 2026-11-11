@@ -9,6 +9,7 @@ export type ShoppingList = { id: number; name: string; createdAt: Date; updatedA
 export type ListItem = { gtin: string; name: string; brand: string; size: string; quantity: number; purchased: boolean; addedAt: Date };
 export type NewItem = { gtin: string; name: string; brand: string; size: string; quantity: number };
 
+/** Listas do usuário com itens e unidades agregados; a alterada mais recentemente vem primeiro. */
 export async function listsOfUser(userId: number): Promise<ShoppingList[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     `SELECT l.id, l.nome, l.criado_em, l.atualizado_em,
@@ -23,11 +24,13 @@ export async function listsOfUser(userId: number): Promise<ShoppingList[]> {
   }));
 }
 
+/** Quantidade de listas (limite por usuário). */
 export async function countLists(userId: number): Promise<number> {
   const [rows] = await pool.execute<RowDataPacket[]>('SELECT COUNT(*) AS n FROM listas WHERE usuario_id=?', [userId]);
   return Number(rows[0]?.n ?? 0);
 }
 
+/** Cria lista; devolve o id. */
 export async function createList(userId: number, name: string): Promise<number> {
   const [result] = await pool.execute<ResultSetHeader>('INSERT INTO listas(usuario_id,nome) VALUES(?,?)', [userId, name]);
   return Number(result.insertId);
@@ -39,6 +42,7 @@ export async function ownsList(userId: number, listId: number): Promise<boolean>
   return rows.length > 0;
 }
 
+/** Renomeia somente se a lista for do usuário (WHERE usuario_id=?). */
 export async function renameList(userId: number, listId: number, name: string): Promise<boolean> {
   const [result] = await pool.execute<ResultSetHeader>(
     'UPDATE listas SET nome=?, atualizado_em=NOW() WHERE id=? AND usuario_id=?',
@@ -47,11 +51,13 @@ export async function renameList(userId: number, listId: number, name: string): 
   return result.affectedRows > 0;
 }
 
+/** Exclui somente se a lista for do usuário. */
 export async function deleteList(userId: number, listId: number): Promise<boolean> {
   const [result] = await pool.execute<ResultSetHeader>('DELETE FROM listas WHERE id=? AND usuario_id=?', [listId, userId]);
   return result.affectedRows > 0;
 }
 
+/** Itens da lista: pendentes primeiro, na ordem em que foram adicionados. */
 export async function itemsOfList(listId: number): Promise<ListItem[]> {
   const [rows] = await pool.execute<RowDataPacket[]>(
     'SELECT gtin,produto_nome,marca,embalagem,quantidade,comprado,adicionado_em FROM lista_itens WHERE lista_id=? ORDER BY comprado ASC, id ASC',
@@ -95,6 +101,7 @@ export async function addItems(listId: number, items: NewItem[], mode: 'add' | '
   }
 }
 
+/** Atualiza campos do item e a data da lista; devolve se o item existe. */
 export async function updateItem(listId: number, gtin: string, patch: { quantity?: number; purchased?: boolean }): Promise<boolean> {
   const sets: string[] = [];
   const args: (number | boolean | string)[] = [];
@@ -112,6 +119,7 @@ export async function updateItem(listId: number, gtin: string, patch: { quantity
   }
 }
 
+/** Remove o item e atualiza a data da lista. */
 export async function removeItem(listId: number, gtin: string): Promise<boolean> {
   const conn = await pool.getConnection();
   try {
@@ -123,6 +131,7 @@ export async function removeItem(listId: number, gtin: string): Promise<boolean>
   }
 }
 
+/** Remove todos os itens da lista. */
 export async function clearItems(listId: number): Promise<void> {
   await pool.execute('DELETE FROM lista_itens WHERE lista_id=?', [listId]);
 }

@@ -25,6 +25,7 @@ const CACHE_TTL_MS = 10*60*1000;
 const cache=new Map<string,{until:number;stores:RealStore[]}>();
 const inFlight=new Map<string,Promise<RealStore[]>>();
 
+/** Converte a resposta do Overpass (nós, vias, relações) em lojas, sem duplicar o mesmo osm_id. */
 export function parseOsmElements(items: OsmElement[]): RealStore[] {
   const result:RealStore[]=[];
   const seen=new Set<string>();
@@ -58,6 +59,10 @@ export function privacyQueryPosition(lat:number,lon:number){
   return {lat:Math.round(lat*100)/100,lon:Math.round(lon*100)/100};
 }
 
+/**
+ * Consulta supermercados no OpenStreetMap (Overpass) perto de uma posição ARREDONDADA
+ * (~1 km, privacidade). Cache de 10 min por região e deduplicação de consultas simultâneas.
+ */
 export async function fetchRealStores(lat:number, lon:number, radiusKm:number):Promise<RealStore[]> {
   const coarse=privacyQueryPosition(lat,lon);
   // A margem inclui lojas na borda da região arredondada.
@@ -91,6 +96,7 @@ export async function fetchRealStores(lat:number, lon:number, radiusKm:number):P
   try{return await promise;}finally{inFlight.delete(key);}
 }
 
+/** Filtra lojas pelo raio usando a distância de haversine (linha reta). */
 export function nearbyFromOsm(stores:RealStore[],lat:number,lon:number,radiusKm:number){
   return stores.filter(store=>haversineKm({lat,lon},{lat:store.latitude,lon:store.longitude})<=radiusKm);
 }

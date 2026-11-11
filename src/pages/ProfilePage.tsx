@@ -1,3 +1,7 @@
+/**
+ * PERFIL (rota /perfil, exige login): resumo da conta (listas e conferências), troca de
+ * nome e de senha (a senha atual é exigida pelo servidor) e saída.
+ */
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowRight, CheckCircle2, CircleUserRound, ListChecks, LogOut, MapPin, ReceiptText } from 'lucide-react';
