@@ -1,24 +1,18 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Bookmark, ChartNoAxesColumnIncreasing, Check,
-  Fuel, Heart, Instagram, Leaf, MapPin, Monitor, Pill, ReceiptText,
+  Heart, Instagram, Leaf, MapPin, ReceiptText,
   Search, ShoppingBasket, ShoppingCart, Tags, UsersRound, Youtube, Facebook,
-  Smartphone, ScanLine, TrendingUp, Grid2X2, Flame
+  Smartphone, ScanLine, TrendingUp, Flame
 } from 'lucide-react';
 import SiteNav from './components/SiteNav';
 import BrandMark from './components/BrandMark';
 import { brl } from './data';
 import './home-fidelity.css';
 
-type ShopCategory = 'Mercados' | 'Farmácias' | 'Eletrônicos' | 'Postos' | 'Outros';
 type Shelf = 'Mais buscados' | 'Promoções' | 'Hortifruti' | 'Básicos';
 
-const categoryIcons: Record<ShopCategory, ReactNode> = {
-  'Mercados': <ShoppingCart size={17}/>, 'Farmácias': <Pill size={17}/>,
-  'Eletrônicos': <Monitor size={17}/>, 'Postos': <Fuel size={17}/>,
-  'Outros': <Grid2X2 size={17}/>
-};
 
 const offers = [
   { name: 'Mercado Avenida', distance: '350 m', time: 'há 2 h', price: 22.90 },
@@ -71,10 +65,8 @@ function PhoneMockups(){return <div className="p6-phone-scene" aria-label="Prév
 export default function HomePage(){
   const navigate = useNavigate();
   const [search,setSearch] = useState('');
-  const [activeCategory,setActiveCategory] = useState<ShopCategory>('Mercados');
   const [shelf,setShelf] = useState<Shelf>('Mais buscados');
   const submitSearch = (e:FormEvent)=>{e.preventDefault();navigate(`/comparar?q=${encodeURIComponent(search.trim())}`)};
-  const changeCategory = (c:ShopCategory)=>{setActiveCategory(c);navigate(`/comparar?categoria=${encodeURIComponent(c)}`)};
   const visibleProducts = shelf==='Hortifruti' ? [] : shelf==='Promoções' ? [...featured].reverse() : featured;
   return <div className="pc-v6-page">
     <SiteNav/>
@@ -84,7 +76,6 @@ export default function HomePage(){
         <h1 id="p6-hero-title">O preço certo,<br/>no <em>lugar certo.</em></h1>
         <p className="p6-hero-description">Compare preços da sua região e confira se o caixa cobrou o valor da prateleira.</p>
         <form className="p6-search" role="search" onSubmit={submitSearch}><Search size={22}/><input aria-label="Buscar produtos" placeholder="Busque um produto, marca ou estabelecimento..." value={search} onChange={e=>setSearch(e.target.value)}/><button className="p6-nearby" type="button" onClick={()=>navigate('/estabelecimentos')}><MapPin size={13}/> Perto de mim</button><button className="p6-search-button" type="submit">Buscar <ArrowRight size={16}/></button></form>
-        <div className="p6-categories">{(Object.keys(categoryIcons) as ShopCategory[]).map(c=><button className={activeCategory===c?'is-active':''} key={c} onClick={()=>changeCategory(c)}>{categoryIcons[c]} {c}</button>)}</div>
       </div><HeroComparison/></section>
       <section className="p6-benefits" aria-label="O que você pode fazer no PreçoClaro">{benefits.map(b=><Link key={b.title} to={b.path} className="p6-benefit"><span className="p6-benefit-icon">{b.icon}</span><span><strong>{b.title}</strong><small>{b.body}</small></span></Link>)}</section>
       <section className="p6-compare" id="comparar-precos" aria-labelledby="p6-compare-title"><div className="p6-section-top"><div><div className="p6-kicker">PRODUTOS DA SUA REGIÃO <span/></div><h2 id="p6-compare-title">Comparar preços</h2><p>Veja os melhores preços de produtos populares em estabelecimentos perto de você.</p></div><div className="p6-tabs">{(['Mais buscados','Promoções','Hortifruti','Básicos'] as Shelf[]).map(t=><button key={t} className={shelf===t?'active':''} onClick={()=>setShelf(t)}>{t==='Mais buscados'&&<Flame size={16}/>} {t==='Promoções'&&<Tags size={16}/>} {t==='Hortifruti'&&<Leaf size={16}/>} {t==='Básicos'&&<ShoppingBasket size={16}/>} {t}</button>)}</div></div>

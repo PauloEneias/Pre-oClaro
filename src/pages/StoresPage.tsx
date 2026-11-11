@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LocateFixed, MapPin, Navigation2, Search, AlertCircle, RefreshCw, PauseCircle, ExternalLink, Radio, Tag } from 'lucide-react';
+import { ArrowRight, LocateFixed, MapPin, Navigation2, Search, AlertCircle, RefreshCw, PauseCircle, ExternalLink, Radio, Tag, List, Map as MapIcon } from 'lucide-react';
 import { getNearbyStores, type ApiStore, type StoresResponse } from '../api';
 import { neighborhoods, useUserLocation } from '../context/LocationContext';
 import StoresMap from '../components/StoresMap';
@@ -22,6 +22,9 @@ export default function StoresPage(){
   const [loading,setLoading]=useState(false);
   const [apiError,setApiError]=useState<string|null>(null);
   const [retry,setRetry]=useState(0);
+  /** No celular a lista e o mapa se alternam; no desktop ficam lado a lado. */
+  const [mobileView,setMobileView]=useState<'list'|'map'>('list');
+  const scroller=useRef<HTMLDivElement>(null);
 
   // Evita uma chamada ao serviço externo a cada movimento do slider.
   useEffect(()=>{const t=setTimeout(()=>setDebouncedRadius(radius),550);return()=>clearTimeout(t);},[radius]);
@@ -36,6 +39,16 @@ export default function StoresPage(){
   },[location,debouncedRadius,retry]);
 
   const matches=useMemo(()=>stores.filter(s=>`${s.name} ${s.neighborhood} ${s.address||''}`.toLowerCase().includes(query.toLowerCase())),[query,stores]);
+  // Loja escolhida no mapa: a lista rola só por dentro até ela, sem mexer na página.
+  useEffect(()=>{
+    const box=scroller.current;
+    const row=box?.querySelector<HTMLElement>(`[data-store="${selectedId}"]`);
+    if(!box||!row)return;
+    const boxRect=box.getBoundingClientRect(),rowRect=row.getBoundingClientRect();
+    const top=rowRect.top-boxRect.top+box.scrollTop;
+    if(rowRect.top<boxRect.top||rowRect.bottom>boxRect.bottom)box.scrollTo({top:Math.max(0,top-12),behavior:'smooth'});
+  },[selectedId]);
+  const showOnMap=(id:number)=>{setSelectedId(id);setMobileView('map');};
 
   return <div className="pc-stores-page">
     <span className="pc-kicker">MERCADOS PRÓXIMOS</span>
@@ -71,27 +84,33 @@ export default function StoresPage(){
       <p className="pc-geo-privacy">O GPS só é ativado após sua escolha. Sua posição não é salva no MySQL; é usada para ordenar lojas próximas. O mapa utiliza mosaicos públicos do OpenStreetMap, que podem receber a região visualizada. Para funcionar, abra em localhost ou HTTPS. No computador, o navegador pode informar uma localização aproximada, não um GPS preciso.</p>
     </section>
 
-    <div className="pc-stores-layout">
+    {location&&<div className="pc-stores-switch" role="tablist" aria-label="Alternar entre lista e mapa">
+      <button type="button" role="tab" aria-selected={mobileView==='list'} className={mobileView==='list'?'is-active':''} onClick={()=>setMobileView('list')}><List size={16}/> Lista{!loading&&matches.length?` (${matches.length})`:''}</button>
+      <button type="button" role="tab" aria-selected={mobileView==='map'} className={mobileView==='map'?'is-active':''} onClick={()=>setMobileView('map')}><MapIcon size={16}/> Mapa</button>
+    </div>}
+    <div className={`pc-stores-layout ${location?`show-${mobileView}`:'show-list'}`}>
       <div className="pc-stores-list">
         <div className="pc-stores-controls">
           <label className="pc-geo-radius" htmlFor="pc-stores-radius">Raio de busca <strong>{radius} km</strong><input id="pc-stores-radius" type="range" min="1" max="30" value={radius} onChange={e=>setRadius(Number(e.target.value))} disabled={!location}/></label>
           <div className="pc-toolbar-search"><Search size={19}/><input placeholder="Buscar supermercado ou bairro..." aria-label="Pesquisar estabelecimento" value={query} onChange={e=>setQuery(e.target.value)}/></div>
+          {location&&<p className="pc-stores-count" aria-live="polite">{loading?'Buscando estabelecimentos...':apiError?'Não foi possível carregar a lista':`${matches.length} estabelecimentos encontrados · raio de ${debouncedRadius} km · ${matches.filter(s=>s.offersCount>0).length} com preços coletados`}</p>}
         </div>
+        <div className="pc-stores-scroll" ref={scroller} tabIndex={0} aria-label="Lista de estabelecimentos">
         {!location&&<div className="pc-empty-real"><MapPin size={29}/><strong>Onde você está?</strong><span>Clique em “Localizar agora” para descobrir estabelecimentos reais na sua região. Não é necessário criar conta.</span></div>}
-        {location&&loading&&<p className="pc-api-state" role="status"><RefreshCw size={15} className="pc-spinning"/> Buscando lojas reais no OpenStreetMap e consultando o MySQL...</p>}
+        {location&&loading&&<><p className="pc-api-state" role="status"><RefreshCw size={15} className="pc-spinning"/> Buscando lojas reais no OpenStreetMap...</p>{Array.from({length:6},(_,i)=><div key={i} className="pc-store-row pc-store-skeleton" aria-hidden="true"><span/><span/></div>)}</>}
         {location&&apiError&&<div className="pc-api-error" role="alert"><AlertCircle size={19}/><span>{apiError}</span><button type="button" onClick={()=>setRetry(v=>v+1)}><RefreshCw size={16}/> Tentar de novo</button></div>}
         {location&&info?.sourceWarning&&!loading&&!apiError&&<p role="status" className="pc-geo-warn">{info.sourceWarning}</p>}
-        {location&&!loading&&!apiError&&<p className="pc-stores-count">{matches.length} estabelecimentos encontrados · raio de {debouncedRadius} km · {matches.filter(s=>s.offersCount>0).length} com preços coletados</p>}
         {location&&!loading&&!apiError&&matches.length===0&&<p className="pc-api-state">Nenhum mercado mapeado encontrado neste raio. Experimente ampliar a distância ou atualizar a consulta. A base OpenStreetMap pode estar incompleta.</p>}
-        {!loading&&!apiError&&matches.map((s,i)=><div className={`pc-store-row pc-store-real ${selectedId===s.id?'pc-store-selected':''}`} key={s.osmId||s.id}>
+        {!loading&&!apiError&&matches.map((s,i)=><div className={`pc-store-row pc-store-real ${selectedId===s.id?'pc-store-selected':''}`} key={s.osmId||s.id} data-store={s.id}>
           <div className="pc-store-icon"><MapPin size={20}/></div>
           <button type="button" className="pc-store-description pc-store-choose" onClick={()=>setSelectedId(s.id)} aria-label={`Mostrar ${s.name} no mapa`}><strong>{s.name}</strong><small>{s.address??s.neighborhood} · {s.distanceKm===null?'Distância indisponível':km(s.distanceKm)}</small><span className="pc-osm-source">{s.network?`${s.network} · `:''}Cadastro OpenStreetMap{s.offersCount>0?'':' · sem preços coletados para esta loja'}</span></button>
           {s.offersCount>0&&<Link className="pc-store-offers" to={`/comparar?loja=${s.id}`} aria-label={`Ver ${s.offersCount} ofertas de ${s.name}`}><Tag size={14}/> {s.offersCount.toLocaleString('pt-BR')} ofertas</Link>}
-          <button type="button" className="pc-map-focus" onClick={()=>setSelectedId(s.id)} aria-label={`Ver ${s.name} no mapa`} title="Ver no mapa"><MapPin size={17}/></button>
+          <button type="button" className="pc-map-focus" onClick={()=>showOnMap(s.id)} aria-label={`Ver ${s.name} no mapa`} title="Ver no mapa"><MapPin size={17}/></button>
           <a href={osmPlaceLink(s.latitude,s.longitude)} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${s.name} no OpenStreetMap`} title="Abrir mapa externo"><ExternalLink size={16}/></a>
           <span className="pc-store-num">{String(i+1).padStart(2,'0')}</span>
         </div>)}
         {location&&!loading&&!apiError&&<p className="pc-muted">As distâncias são <strong>em linha reta</strong>, não o percurso pelas ruas. Nomes e coordenadas vêm de contribuições do OpenStreetMap, sem garantia de cadastro completo ou horário de funcionamento. Só aparecem ofertas nas lojas que foram ligadas com segurança a uma unidade das redes coletadas. <Link to="/catalogo">Ver todas as unidades no catálogo <ArrowRight size={13}/></Link></p>}
+        </div>
       </div>
       {location ? <StoresMap
         location={location}
