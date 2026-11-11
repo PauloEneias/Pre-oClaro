@@ -6,16 +6,41 @@ import { notFound } from '../http/errors.js';
 import * as products from '../repositories/productRepository.js';
 import type { ProductSearch } from '../repositories/productRepository.js';
 import { findStoreName } from '../repositories/storeRepository.js';
+import type { ProductCandidate } from '../repositories/productRepository.js';
+import type { CategoryId } from '../searchRelevance.js';
+import { rankSearch, type SearchSummary } from './searchRanking.js';
 
 export const SEARCH_PAGE_SIZES = [20, 40, 60] as const;
 
 /** Economia só é informada quando há mais de uma oferta e a diferença não é zero. */
 const realSavings = (value: number | null) => (value ? value : null);
 
-export async function search(filters: ProductSearch, page: number, perPage: number) {
-  const total = await products.countProducts(filters);
-  const ids = await products.pageOfProductIds(filters, perPage, (page - 1) * perPage);
-  const offers = await products.offersForProducts(filters, ids);
+/**
+ * Busca de ofertas geolocalizadas. Com pesquisa, os produtos recebem nota de relevância antes da
+ * paginação e as ordenações (preço, distância, nome) valem DENTRO do nível de relevância.
+ * Sem pesquisa, a página continua sendo decidida direto no banco.
+ */
+export async function search(filters: ProductSearch, page: number, perPage: number, options: { category?: CategoryId | null; related?: boolean } = {}) {
+  let total: number;
+  let ids: number[];
+  let search: SearchSummary | null = null;
+  if (filters.q || options.category) {
+    const ranked = await rankSearch<ProductCandidate>({
+      q: filters.q, category: options.category ?? null, related: Boolean(options.related), sort: filters.sort,
+      page, perPage,
+      fetch: (parsed) => products.searchCandidates(filters, parsed ? parsed.sqlGroups : []),
+      describe: (r) => ({ names: [r.name], brand: r.brand, size: r.size, gtin: r.gtin }),
+      keys: { price: (r) => r.best, name: (r) => r.name, distance: (r) => r.nearest, id: (r) => r.productId },
+    });
+    total = ranked.total;
+    ids = ranked.pageRows.map((r) => r.productId);
+    search = ranked.summary;
+  } else {
+    const plain = { ...filters, sort: filters.sort === 'relevance' ? ('price' as const) : filters.sort };
+    total = await products.countProducts(plain);
+    ids = await products.pageOfProductIds(plain, perPage, (page - 1) * perPage);
+  }
+  const offers = await products.offersForProducts({ ...filters, q: '' }, ids);
   // Mantém a ordem da página decidida no banco (preço, distância ou nome).
   const position = new Map(ids.map((id, index) => [id, index]));
   const groups = groupByExactProduct(offers)
@@ -25,7 +50,7 @@ export async function search(filters: ProductSearch, page: number, perPage: numb
     mode: filters.mode, isDemo: filters.mode === 'demo', query: filters.q, quantity: filters.quantity,
     sort: filters.sort, page, perPage, total, pages: Math.ceil(total / perPage),
     store: filters.storeId ? { id: filters.storeId, name: await findStoreName(filters.storeId) } : null,
-    count: offers.length, products: groups, offers,
+    count: offers.length, products: groups, offers, search,
   };
 }
 

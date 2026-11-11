@@ -19,7 +19,7 @@ export type OfferRow = {
 export type ProductSearch = {
   q: string; mode: PriceMode; quantity: number; location: LocationFilter | null;
   storeId: number | null; maxPrice: number | null; freshHours: number | null;
-  sort: 'price' | 'distance' | 'name';
+  sort: 'price' | 'distance' | 'name' | 'relevance';
 };
 
 /**
@@ -58,16 +58,18 @@ function toOffer(r: RowDataPacket): OfferRow {
   };
 }
 
-/** Condições comuns à contagem, à página de produtos e à busca das ofertas. */
-function searchWhere(f: ProductSearch): { sql: string; args: (string | number)[] } {
+/**
+ * Condições comuns à contagem, à página de produtos e à busca das ofertas.
+ * `groups` são os termos já interpretados pela relevância (searchRelevance.parseQuery): cada grupo
+ * é obrigatório e, dentro dele, basta uma forma (plural, sinônimo). A comparação ignora
+ * maiúsculas e acentos ("acucar" encontra "Açúcar"); o GTIN faz parte do texto pesquisado.
+ */
+function searchWhere(f: ProductSearch, groups: string[][] = []): { sql: string; args: (string | number)[] } {
   const parts = [`e.ativo=TRUE AND o.disponivel=TRUE AND ${modeFilter(f.mode)} AND o.quantidade_minima <= ?`];
   const args: (string | number)[] = [f.quantity];
-  // Cada palavra precisa aparecer no nome, na marca ou na embalagem; um GTIN digitado casa direto.
-  // A comparação ignora maiúsculas e acentos ("acucar" encontra "Açúcar").
-  const words = f.q.split(/\s+/).filter(Boolean).slice(0, 8);
-  for (const word of words) {
-    parts.push(`(CONCAT_WS(' ', p.nome, p.marca, p.embalagem) ${ACCENT_INSENSITIVE} LIKE ? OR p.gtin = ?)`);
-    args.push(likeTerm(word), word);
+  for (const group of groups) {
+    parts.push(`(${group.map(() => `CONCAT_WS(' ', p.nome, p.marca, p.embalagem, p.gtin) ${ACCENT_INSENSITIVE} LIKE ?`).join(' OR ')})`);
+    args.push(...group.map(likeTerm));
   }
   if (f.location) {
     parts.push(`${DISTANCE} <= ?`);
@@ -98,7 +100,36 @@ export async function countProducts(f: ProductSearch): Promise<number> {
   return Number(rows[0]?.total ?? 0);
 }
 
-/** Ids dos produtos de uma página, em ordem determinística (desempate pelo id). */
+export type ProductCandidate = {
+  productId: number; name: string; brand: string; size: string; gtin: string | null;
+  best: number; nearest: number | null;
+};
+/** Teto de candidatos de uma pesquisa (a resposta avisa quando ele é atingido). */
+export const PRODUCT_CANDIDATE_LIMIT = 6000;
+
+/**
+ * Todos os produtos que passam no pré-filtro da pesquisa, com menor preço e menor distância,
+ * SEM paginação: a relevância e a ordenação são decididas no serviço antes de paginar.
+ */
+export async function searchCandidates(f: ProductSearch, groups: string[][]): Promise<{ rows: ProductCandidate[]; truncated: boolean }> {
+  const where = searchWhere(f, groups);
+  const nearest = f.location ? `MIN(${DISTANCE})` : 'NULL';
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT p.id AS productId, MIN(p.nome) AS name, MIN(p.marca) AS brand, MIN(p.embalagem) AS size, MIN(p.gtin) AS gtin,
+       MIN(o.preco) AS best, ${nearest} AS nearest
+     ${OFFER_FROM} WHERE ${where.sql} GROUP BY p.id LIMIT ${PRODUCT_CANDIDATE_LIMIT + 1}`,
+    [...(f.location ? [f.location.lon, f.location.lat] : []), ...where.args]
+  );
+  return {
+    truncated: rows.length > PRODUCT_CANDIDATE_LIMIT,
+    rows: rows.slice(0, PRODUCT_CANDIDATE_LIMIT).map((r) => ({
+      productId: Number(r.productId), name: String(r.name), brand: String(r.brand ?? ''), size: String(r.size ?? ''),
+      gtin: r.gtin ?? null, best: Number(r.best), nearest: r.nearest === null || r.nearest === undefined ? null : Number(r.nearest),
+    })),
+  };
+}
+
+/** Ids dos produtos de uma página, em ordem determinística (desempate pelo id). Usado sem pesquisa. */
 export async function pageOfProductIds(f: ProductSearch, limit: number, offset: number): Promise<number[]> {
   const where = searchWhere(f);
   const byDistance = f.sort === 'distance' && f.location;
@@ -113,7 +144,7 @@ export async function pageOfProductIds(f: ProductSearch, limit: number, offset: 
   return rows.map((r) => Number(r.productId));
 }
 
-/** Todas as ofertas elegíveis dos produtos da página (uma consulta só, sem N+1). */
+/** Todas as ofertas elegíveis dos produtos da página (uma consulta só, sem N+1). Os ids já vêm escolhidos. */
 export async function offersForProducts(f: ProductSearch, productIds: number[]): Promise<OfferRow[]> {
   if (!productIds.length) return [];
   const where = searchWhere(f);

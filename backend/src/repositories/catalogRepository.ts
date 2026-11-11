@@ -84,6 +84,85 @@ export async function pageOfSharedGtins(
   return { total: Number(count[0]?.total ?? 0), gtins: rows.map((r) => String(r.gtin)) };
 }
 
+/** Produto candidato à pesquisa, com tudo o que a nota de relevância e as ordenações precisam. */
+export type SearchCandidate = {
+  gtin: string; names: string[]; brand: string; size: string;
+  lastReference: string; networks: number; bestPrice: number | null;
+};
+/** Teto de candidatos por pesquisa: acima disso a pesquisa é ampla demais e a resposta avisa. */
+export const CANDIDATE_LIMIT = 6000;
+
+/**
+ * Pré-filtro da pesquisa por relevância: TODOS os produtos (GTIN) cujos textos contêm cada grupo
+ * de termos — sem paginação, porque a ordem por relevância é decidida depois, no serviço.
+ * `groups`: cada grupo é obrigatório; dentro do grupo basta uma das formas (plural, sinônimo).
+ * `starts`: alternativa para o filtro de categoria sem pesquisa (nome começa por uma das palavras).
+ */
+export async function searchCandidates(f: {
+  groups: string[][]; starts?: string[]; network: string; networks?: readonly string[]; quantity: number;
+}): Promise<{ rows: SearchCandidate[]; truncated: boolean }> {
+  const text = `CONCAT_WS(' ', produto_nome, marca, embalagem, gtin) ${ACCENT_INSENSITIVE}`;
+  const terms = f.groups.map((g) => `(${g.map(() => `${text} LIKE ?`).join(' OR ')})`);
+  const termArgs = f.groups.flatMap((g) => g.map(likeTerm));
+  if (f.starts?.length) {
+    terms.push(`(${f.starts.map(() => `produto_nome ${ACCENT_INSENSITIVE} LIKE ?`).join(' OR ')})`);
+    termArgs.push(...f.starts.map((w) => `${w.replace(/[\\%_]/g, '\\$&')}%`));
+  }
+  const match = terms.length ? terms.join(' AND ') : 'TRUE';
+  const select = `SELECT gtin, GROUP_CONCAT(DISTINCT produto_nome ORDER BY produto_nome SEPARATOR '\\n') AS names,
+      MIN(marca) AS brand, MIN(embalagem) AS size, DATE_FORMAT(MAX(referencia_em),'%Y-%m-%d') AS lastReference,
+      COUNT(DISTINCT rede) AS networks, MIN(CASE WHEN quantidade_minima<=? THEN preco END) AS bestPrice
+    FROM ${TABLE}`;
+  let sql: string;
+  let args: (string | number)[];
+  if (f.networks?.length) {
+    // Comparação entre redes: o GTIN precisa existir em todas; basta uma rede descrever com os termos.
+    sql = `${select} WHERE uf='MA' AND rede IN (${f.networks.map(() => '?').join(',')})
+      GROUP BY gtin HAVING COUNT(DISTINCT rede)=${f.networks.length} AND MAX(${match})=1`;
+    args = [f.quantity, ...f.networks, ...termArgs];
+  } else if (f.network) {
+    // Uma rede só: o produto precisa ter oferta nela, mas a relevância usa os nomes de TODAS as
+    // redes para o mesmo GTIN (a identidade é o código de barras; cada rede escreve o nome do
+    // seu jeito). Preço e data vêm só da rede escolhida.
+    sql = `SELECT gtin, GROUP_CONCAT(DISTINCT produto_nome ORDER BY produto_nome SEPARATOR '\\n') AS names,
+        MIN(marca) AS brand, MIN(embalagem) AS size,
+        DATE_FORMAT(MAX(CASE WHEN rede=? THEN referencia_em END),'%Y-%m-%d') AS lastReference,
+        COUNT(DISTINCT rede) AS networks, MIN(CASE WHEN rede=? AND quantidade_minima<=? THEN preco END) AS bestPrice
+      FROM ${TABLE} WHERE uf='MA' GROUP BY gtin HAVING SUM(rede=?)>0 AND MAX(${match})=1`;
+    args = [f.network, f.network, f.quantity, f.network, ...termArgs];
+  } else {
+    sql = `${select} WHERE uf='MA' AND ${match} GROUP BY gtin`;
+    args = [f.quantity, ...termArgs];
+  }
+  const [rows] = await pool.execute<RowDataPacket[]>(`${sql} LIMIT ${CANDIDATE_LIMIT + 1}`, args);
+  return {
+    truncated: rows.length > CANDIDATE_LIMIT,
+    rows: rows.slice(0, CANDIDATE_LIMIT).map((r) => ({
+      gtin: String(r.gtin), names: String(r.names ?? '').split('\n').filter(Boolean), brand: String(r.brand ?? ''),
+      size: String(r.size ?? ''), lastReference: String(r.lastReference), networks: Number(r.networks),
+      bestPrice: r.bestPrice === null ? null : Number(r.bestPrice),
+    })),
+  };
+}
+
+/** Melhor referência de cada GTIN em cada unidade, restrita a GTINs já escolhidos pela relevância. */
+export async function documentedPricesFor(
+  gtins: string[], quantity: number, limit: number, offset: number
+): Promise<{ total: number; rows: CatalogRow[] }> {
+  if (!gtins.length) return { total: 0, rows: [] };
+  const marks = gtins.map(() => '?').join(',');
+  const ranked = `SELECT ${FIELDS},
+      ROW_NUMBER() OVER (PARTITION BY gtin,canal_codigo ORDER BY referencia_em DESC,quantidade_minima DESC,id DESC) AS rn
+    FROM ${TABLE} WHERE uf='MA' AND gtin IN (${marks}) AND quantidade_minima<=?`;
+  const args = [...gtins, quantity];
+  const [count] = await pool.execute<RowDataPacket[]>(`SELECT COUNT(*) AS total FROM (${ranked}) t WHERE rn=1`, args);
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT * FROM (${ranked}) t WHERE rn=1 ORDER BY price ASC, channelName ASC, id ASC LIMIT ? OFFSET ?`,
+    [...args, limit, offset]
+  );
+  return { total: Number(count[0]?.total ?? 0), rows: rows.map(toRow) };
+}
+
 /**
  * Melhor referência de cada produto em cada unidade para a quantidade pedida
  * (lista "Catálogos online" da página de comparação), paginada no servidor.

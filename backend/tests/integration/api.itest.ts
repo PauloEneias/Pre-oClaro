@@ -114,6 +114,29 @@ test('catálogo: contagem real, primeira e última página, tamanho de página e
   assert.deepEqual(byName.body.items.map((i: any) => i.product.name), ['Zzteste Arroz 1kg', 'Zzteste Café 500g', 'Zzteste Feijão 1kg', 'Zzteste Sal 1kg']);
 });
 
+test('catálogo: relevância antes da paginação, categorias e validação dos novos parâmetros', async () => {
+  const r = await call('GET', '/api/catalog/items?q=zzteste%20feijao');
+  assert.equal(r.status, 200);
+  assert.equal(r.body.sort, 'relevance', 'com pesquisa o padrão é a relevância');
+  assert.equal(r.body.search.showing, 'strong');
+  assert.equal(r.body.search.strongTotal, 1);
+  assert.deepEqual(r.body.search.categories, [{ id: 'mercearia', label: 'Mercearia', count: 1 }]);
+  const byCategory = await call('GET', '/api/catalog/items?q=zzteste&category=mercearia');
+  assert.equal(byCategory.body.total, 4);
+  assert.equal((await call('GET', '/api/catalog/items?q=zzteste&category=hortifruti')).body.total, 0);
+  const byPrice = await call('GET', '/api/catalog/items?q=zzteste&sort=price');
+  const prices = byPrice.body.items.map((i: any) => i.cheapest?.price ?? Infinity);
+  assert.deepEqual(prices, [...prices].sort((a: number, b: number) => a - b), 'ordem por preço dentro do nível de relevância');
+  assert.equal((await call('GET', '/api/catalog/items?category=inexistente')).status, 400);
+  assert.equal((await call('GET', '/api/catalog/items?sort=qualquer')).status, 400);
+  const none = await call('GET', '/api/catalog/items?q=zzteste%20inexistentezz');
+  assert.deepEqual([none.body.total, none.body.search.strongTotal, none.body.search.relatedTotal], [0, 0, 0]);
+  const cats = await call('GET', '/api/catalog/categories');
+  assert.ok(cats.body.categories.some((c: any) => c.id === 'ovos'));
+  // Sem pesquisa a resposta continua igual (paginação no SQL, sem resumo de relevância).
+  assert.equal((await call('GET', '/api/catalog/items?perPage=20')).body.search, null);
+});
+
 test('catálogo: filtros por rede e comparação Atacadão + Mateus por GTIN', async () => {
   const atacadao = await call('GET', '/api/catalog/items?q=zzteste&network=Atacad%C3%A3o');
   assert.deepEqual(atacadao.body.items.map((i: any) => i.gtin).sort(), [A, B, D]);

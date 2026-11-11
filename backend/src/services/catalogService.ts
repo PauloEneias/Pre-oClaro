@@ -8,7 +8,9 @@ import {
   compareBasket, compareCatalogItem, compareNetworks, productNameSuggestion, type BasketLine, type CatalogRow,
 } from '../catalogComparison.js';
 import * as catalog from '../repositories/catalogRepository.js';
-import type { CatalogSort } from '../repositories/catalogRepository.js';
+import type { CatalogSort, SearchCandidate } from '../repositories/catalogRepository.js';
+import { categoryStarts, type CategoryId } from '../searchRelevance.js';
+import { rankSearch, type SearchSummary } from './searchRanking.js';
 
 /** Redes da opção "Comparar Atacadão + Mateus". Unidades (canais) não são redes. */
 export const COMPARED_NETWORKS = ['Atacadão', 'Mateus Mais'] as const;
@@ -25,13 +27,47 @@ function withFreshness<T extends { referenceDate: string }>(offer: T) {
   return { ...offer, ageDays: age, stale: age > STALE_AFTER_DAYS };
 }
 
-type ItemsInput = { q: string; network: string; compare: boolean; quantity: number; sort: CatalogSort; page: number; perPage: number };
+/** Ordenações do catálogo. "relevance" é o padrão quando há pesquisa. */
+export type CatalogListSort = CatalogSort | 'relevance' | 'price';
+type ItemsInput = {
+  q: string; network: string; compare: boolean; quantity: number; sort: CatalogListSort; page: number; perPage: number;
+  category?: CategoryId | null; related?: boolean;
+};
 
+/**
+ * Página de produtos do catálogo. Sem pesquisa nem categoria, a paginação é feita direto no SQL
+ * (rápido, ordem por data ou nome). Com pesquisa ou categoria, TODOS os candidatos recebem nota
+ * de relevância e só depois a lista é ordenada e paginada (ver services/searchRanking.ts).
+ */
 export async function listItems(input: ItemsInput) {
   const offset = (input.page - 1) * input.perPage;
-  const { total, gtins } = input.compare
-    ? await catalog.pageOfSharedGtins({ q: input.q, sort: input.sort }, COMPARED_NETWORKS, input.perPage, offset)
-    : await catalog.pageOfGtins({ q: input.q, network: input.network, sort: input.sort }, input.perPage, offset);
+  let total: number;
+  let gtins: string[];
+  let search: SearchSummary | null = null;
+  if (input.q || input.category) {
+    const ranked = await rankSearch<SearchCandidate>({
+      q: input.q, category: input.category ?? null, related: Boolean(input.related),
+      sort: input.sort,
+      page: input.page, perPage: input.perPage,
+      fetch: (parsed) => catalog.searchCandidates({
+        groups: parsed ? parsed.sqlGroups : [],
+        starts: !parsed && input.category ? categoryStarts(input.category) : undefined,
+        network: input.compare ? '' : input.network,
+        networks: input.compare ? COMPARED_NETWORKS : undefined,
+        quantity: input.quantity,
+      }),
+      describe: (r) => ({ names: r.names, brand: r.brand, size: r.size, gtin: r.gtin }),
+      keys: { price: (r) => r.bestPrice, name: (r) => r.names[0] ?? '', recent: (r) => r.lastReference, id: (r) => r.gtin },
+    });
+    total = ranked.total;
+    gtins = ranked.pageRows.map((r) => r.gtin);
+    search = ranked.summary;
+  } else {
+    const sort: CatalogSort = input.sort === 'name' ? 'name' : 'recent';
+    ({ total, gtins } = input.compare
+      ? await catalog.pageOfSharedGtins({ q: '', sort }, COMPARED_NETWORKS, input.perPage, offset)
+      : await catalog.pageOfGtins({ q: '', network: input.network, sort }, input.perPage, offset));
+  }
   const ids = input.compare ? gtins.filter(gtinValid) : gtins;
   const [all, images] = await Promise.all([catalog.rowsForGtins(ids), catalog.imagesForGtins(ids)]);
   const allowed: readonly string[] = COMPARED_NETWORKS;
@@ -56,7 +92,7 @@ export async function listItems(input: ItemsInput) {
     query: input.q, network: input.compare ? '' : input.network, compare: input.compare,
     ...(input.compare ? { comparedNetworks: COMPARED_NETWORKS } : {}),
     sort: input.sort, quantity: input.quantity, page: input.page, perPage: input.perPage,
-    total, pages: Math.ceil(total / input.perPage), items,
+    total, pages: Math.ceil(total / input.perPage), items, search,
     note: input.compare
       ? 'Somente produtos com o mesmo GTIN/EAN nas duas redes. De cada rede aparece a unidade com o menor preço para a quantidade pedida.'
       : 'Preços coletados dos sites das redes ou importados, sempre com fonte e data; não são preços ao vivo.',
@@ -86,7 +122,20 @@ export async function compareBasketLines(basket: BasketLine[]) {
 }
 
 export async function documentedPrices(q: string, quantity: number, page: number, perPage: number) {
-  const { total, rows } = await catalog.documentedPrices(q, quantity, perPage, (page - 1) * perPage);
+  // Com pesquisa, só entram os produtos que SÃO o item pesquisado (nível forte da relevância).
+  let result: { total: number; rows: CatalogRow[] };
+  if (q) {
+    const ranked = await rankSearch<SearchCandidate>({
+      q, category: null, related: false, sort: 'relevance', page: 1, perPage: catalog.CANDIDATE_LIMIT,
+      fetch: (parsed) => catalog.searchCandidates({ groups: parsed ? parsed.sqlGroups : [], network: '', quantity }),
+      describe: (r) => ({ names: r.names, brand: r.brand, size: r.size, gtin: r.gtin }),
+      keys: { price: (r) => r.bestPrice, name: (r) => r.names[0] ?? '', id: (r) => r.gtin },
+    });
+    result = await catalog.documentedPricesFor(ranked.pageRows.map((r) => r.gtin), quantity, perPage, (page - 1) * perPage);
+  } else {
+    result = await catalog.documentedPrices(q, quantity, perPage, (page - 1) * perPage);
+  }
+  const { total, rows } = result;
   const images = await catalog.imagesForGtins([...new Set(rows.map((r) => r.gtin))]);
   return {
     source: 'CATALOGO_DOCUMENTADO' as const, query: q, quantity, uf: 'MA', pricesAreLive: false as const,

@@ -13,6 +13,7 @@ import * as products from '../services/productService.js';
 import * as stores from '../services/storeService.js';
 import { imageCoverage } from '../repositories/productRepository.js';
 import { pool } from '../db.js';
+import { CATEGORIES, isCategory } from '../searchRelevance.js';
 
 const text = (value: string | undefined, max: number, label: string) => {
   const result = String(value ?? '').trim();
@@ -48,8 +49,10 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
   app.get<{ Querystring: Query }>('/api/products/search', async (request) => {
     const q = text(request.query.q, 80, 'Busca');
     const { page, perPage } = parsePaging(request.query, [...products.SEARCH_PAGE_SIZES], 20);
-    const sort = request.query.sort ?? 'price';
-    if (sort !== 'price' && sort !== 'distance' && sort !== 'name') throw badRequest('Ordenação inválida.');
+    const sort = request.query.sort ?? (q ? 'relevance' : 'price');
+    if (sort !== 'price' && sort !== 'distance' && sort !== 'name' && sort !== 'relevance') throw badRequest('Ordenação inválida.');
+    const categoryParam = text(request.query.category, 20, 'Categoria');
+    if (categoryParam && !isCategory(categoryParam)) throw badRequest('Categoria inválida.');
     const maxPrice = request.query.maxPrice ? Number(request.query.maxPrice) : null;
     if (maxPrice !== null && (!Number.isFinite(maxPrice) || maxPrice <= 0 || maxPrice > 100000)) throw badRequest('Preço máximo inválido.');
     const freshHours = request.query.freshHours ? Number(request.query.freshHours) : null;
@@ -61,7 +64,8 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
         q, mode: valid(() => parsePriceMode(request.query.mode)), quantity: valid(() => parseQuantity(request.query.quantity)),
         location: valid(() => parseLocationFilter(request.query)), storeId, maxPrice, freshHours, sort,
       },
-      page, perPage
+      page, perPage,
+      { category: categoryParam && isCategory(categoryParam) ? categoryParam : null, related: request.query.related === '1' }
     );
   });
 
@@ -95,11 +99,21 @@ export function registerCatalogRoutes(app: FastifyInstance): void {
     const network = text(request.query.network, 100, 'Filtro');
     const compare = request.query.compare === '1';
     if (compare && network) throw badRequest('Use o filtro de mercado OU a comparação entre redes, não os dois.');
-    const sort = request.query.sort ?? 'recent';
-    if (sort !== 'recent' && sort !== 'name') throw badRequest('Ordenação inválida.');
+    // Com pesquisa, o padrão é a relevância; sem pesquisa, a coleta mais recente.
+    const sort = request.query.sort ?? (q ? 'relevance' : 'recent');
+    if (sort !== 'recent' && sort !== 'name' && sort !== 'relevance' && sort !== 'price') throw badRequest('Ordenação inválida.');
+    const categoryParam = text(request.query.category, 20, 'Categoria');
+    if (categoryParam && !isCategory(categoryParam)) throw badRequest('Categoria inválida.');
+    const category = categoryParam && isCategory(categoryParam) ? categoryParam : null;
     const { page, perPage } = parsePaging(request.query, [...catalog.PAGE_SIZES], 20);
-    return catalog.listItems({ q, network, compare, quantity: valid(() => parseQuantity(request.query.quantity)), sort, page, perPage });
+    return catalog.listItems({
+      q, network, compare, quantity: valid(() => parseQuantity(request.query.quantity)), sort, page, perPage,
+      category, related: request.query.related === '1',
+    });
   });
+
+  /** Categorias internas do catálogo (classificação pelo núcleo do nome do produto). */
+  app.get('/api/catalog/categories', async () => ({ categories: CATEGORIES }));
 
   app.get<{ Querystring: Query }>('/api/catalog/compare', async (request) => {
     const gtin = String(request.query.gtin ?? '').trim();

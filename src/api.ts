@@ -60,9 +60,30 @@ export type ApiOffer = {
 };
 export type ProductGroup = { productId: number; best: ApiOffer; offers: ApiOffer[]; savings: number | null };
 export type Paged = { page: number; perPage: number; total: number; pages: number };
+/** Categorias internas do catálogo (mesmos ids do back-end, backend/src/searchRelevance.ts). */
+export const CATEGORIES = [
+  { id: 'hortifruti', label: 'Hortifrúti' }, { id: 'carnes', label: 'Carnes' }, { id: 'aves', label: 'Aves' },
+  { id: 'peixes', label: 'Peixes e frutos do mar' }, { id: 'ovos', label: 'Ovos' }, { id: 'laticinios', label: 'Laticínios e frios' },
+  { id: 'mercearia', label: 'Mercearia' }, { id: 'padaria', label: 'Padaria e matinais' }, { id: 'biscoitos', label: 'Biscoitos e snacks' },
+  { id: 'doces', label: 'Doces e sobremesas' }, { id: 'bebidas', label: 'Bebidas' }, { id: 'congelados', label: 'Congelados e prontos' },
+  { id: 'limpeza', label: 'Limpeza' }, { id: 'higiene', label: 'Higiene e beleza' }, { id: 'bebe', label: 'Bebê' },
+  { id: 'pet', label: 'Pet' }, { id: 'casa', label: 'Casa e utilidades' }, { id: 'outros', label: 'Outros' },
+] as const;
+export type CategoryId = (typeof CATEGORIES)[number]['id'];
+/**
+ * Resumo da pesquisa por relevância. `showing`: 'strong' = produtos que são o item pesquisado;
+ * 'related' = apenas contêm/acompanham o termo (pedidos com related=1); 'all' = sem pesquisa.
+ */
+export type SearchSummary = {
+  query: string; correctedQuery: string | null; showing: 'strong' | 'related' | 'all';
+  strongTotal: number; relatedTotal: number; category: CategoryId | null;
+  categories: { id: CategoryId; label: string; count: number }[];
+  soldByWeightHint: boolean; truncated: boolean;
+};
 export type SearchResponse = Paged & {
   mode: PriceMode; isDemo: boolean; query: string; quantity: number; sort: string;
   store: { id: number; name: string | null } | null; count: number; products: ProductGroup[]; offers: ApiOffer[];
+  search: SearchSummary | null;
 };
 export type PriceHistoryRow = { id: number; price: number; observedAt: string; sourceType: string; storeName: string; minimumQuantity: number };
 export type ProductDetailResponse = {
@@ -82,12 +103,16 @@ export function getNearbyStores(location: Position, radiusKm: number, signal?: A
 }
 export type OfferSearch = {
   query: string; location: Position | null; radiusKm: number; mode: PriceMode; quantity: number;
-  page?: number; perPage?: number; sort?: 'price' | 'distance' | 'name'; maxPrice?: number | null; freshHours?: number | null; storeId?: number | null;
+  page?: number; perPage?: number; sort?: 'relevance' | 'price' | 'distance' | 'name'; maxPrice?: number | null; freshHours?: number | null; storeId?: number | null;
+  /** Mostrar os produtos apenas relacionados ao termo (sabor, ingrediente, acessório). */
+  related?: boolean;
 };
 export function searchOffers(f: OfferSearch, signal?: AbortSignal) {
   const params = locationParams(f.location, f.radiusKm);
   params.set('mode', f.mode); params.set('quantity', String(f.quantity)); params.set('q', f.query);
-  params.set('page', String(f.page ?? 1)); params.set('perPage', String(f.perPage ?? 20)); params.set('sort', f.sort ?? 'price');
+  params.set('page', String(f.page ?? 1)); params.set('perPage', String(f.perPage ?? 20));
+  if (f.sort) params.set('sort', f.sort);
+  if (f.related) params.set('related', '1');
   if (f.maxPrice) params.set('maxPrice', String(f.maxPrice));
   if (f.freshHours) params.set('freshHours', String(f.freshHours));
   if (f.storeId) params.set('storeId', String(f.storeId));
@@ -147,17 +172,26 @@ export type CatalogItemComparison = {
   /** Presente apenas na opção "Comparar Atacadão + Mateus". */
   networks?: CatalogNetworkComparison;
 };
-export type CatalogSort = 'recent' | 'name';
+/** "relevance" é o padrão do servidor quando há pesquisa; "recent" quando não há. */
+export type CatalogSort = 'relevance' | 'recent' | 'name' | 'price';
 export type CatalogItemsResponse = Paged & {
   source: 'CATALOGO_DOCUMENTADO'; pricesAreLive: false; query: string; network: string; compare?: boolean;
   sort: CatalogSort; quantity: number; items: CatalogItemComparison[]; note: string;
+  search: SearchSummary | null;
 };
 /** Valor do filtro Mercado que pede a comparação entre as duas redes. */
 export const CATALOG_COMPARE = '__comparar__';
-export function getCatalogItems(query = '', quantity = 1, page = 1, network = '', signal?: AbortSignal, perPage = 20, sort: CatalogSort = 'recent') {
+export function getCatalogItems(
+  query = '', quantity = 1, page = 1, network = '', signal?: AbortSignal, perPage = 20, sort?: CatalogSort,
+  options: { category?: CategoryId | null; related?: boolean } = {}
+) {
   const compare = network === CATALOG_COMPARE;
-  const params = new URLSearchParams({ q: query, quantity: String(quantity), page: String(page), perPage: String(perPage), sort, network: compare ? '' : network });
+  const params = new URLSearchParams({ q: query, quantity: String(quantity), page: String(page), perPage: String(perPage), network: compare ? '' : network });
+  // Sem ordenação explícita o servidor escolhe: relevância com pesquisa, coleta mais recente sem.
+  if (sort) params.set('sort', sort);
   if (compare) params.set('compare', '1');
+  if (options.category) params.set('category', options.category);
+  if (options.related) params.set('related', '1');
   return request<CatalogItemsResponse>(`/catalog/items?${params}`, signal);
 }
 export function getCatalogComparison(gtin: string, quantity = 1, signal?: AbortSignal) {

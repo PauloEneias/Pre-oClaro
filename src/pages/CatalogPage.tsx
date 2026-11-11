@@ -2,16 +2,21 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Search, ShoppingBasket, ExternalLink, Check, AlertCircle, Plus, GitCompareArrows, RefreshCw, Clock3 } from 'lucide-react';
 import { brl } from '../data';
-import { CATALOG_COMPARE, getCatalogItems, getSimilarCatalogItems, type CatalogItemsResponse, type CatalogNetworkComparison, type CatalogSort, type SimilarItemsResponse } from '../api';
+import { CATALOG_COMPARE, CATEGORIES, getCatalogItems, getSimilarCatalogItems, type CatalogItemsResponse, type CatalogNetworkComparison, type CatalogSort, type CategoryId, type SimilarItemsResponse } from '../api';
 import { useBasket } from '../context/BasketContext';
 import { productSubtitle, referenceLabel, shortDate } from '../format';
 import Pagination from '../components/Pagination';
 import ProductImage from '../components/ProductImage';
 import { useAddToList } from '../components/AddToList';
+import SearchNotice from '../components/SearchNotice';
 
 const PER_PAGE = [20, 40, 60] as const;
 const NETWORKS: Record<string, string> = { atacadao: 'Atacadão', mateus: 'Mateus Mais', comparar: CATALOG_COMPARE };
 const networkSlug = (value: string) => Object.entries(NETWORKS).find(([, v]) => v === value)?.[0] ?? '';
+/** Ordenação na URL (?ordem=): sem o parâmetro vale a relevância (com pesquisa) ou a coleta mais recente. */
+const SORT_PARAM: Record<string, CatalogSort> = { relevancia: 'relevance', recente: 'recent', nome: 'name', preco: 'price' };
+const sortParam = (sort: CatalogSort) => Object.entries(SORT_PARAM).find(([, v]) => v === sort)?.[0] ?? null;
+const isCategoryId = (value: string | null): value is CategoryId => CATEGORIES.some(c => c.id === value);
 
 /** Atacadão × Mateus Mais lado a lado: unidade responsável, preço, mínimo e data da coleta. */
 function NetworkComparison({ data, quantity }: { data: CatalogNetworkComparison; quantity: number }) {
@@ -45,7 +50,14 @@ export default function CatalogPage() {
   const quantity = Math.min(999, Math.max(1, Number(url.get('qtd')) || 1));
   const page = Math.max(1, Number(url.get('pagina')) || 1);
   const perPage = (PER_PAGE as readonly number[]).includes(Number(url.get('por'))) ? Number(url.get('por')) : 20;
-  const sort: CatalogSort = url.get('ordem') === 'nome' ? 'name' : 'recent';
+  const categoryParam = url.get('categoria');
+  const category: CategoryId | null = isCategoryId(categoryParam) ? categoryParam : null;
+  const related = url.get('relacionados') === '1' && Boolean(query);
+  // Relevância e preço dependem da nota calculada no servidor: só valem com pesquisa ou categoria.
+  const ranked = Boolean(query || category);
+  const requested = SORT_PARAM[url.get('ordem') ?? ''];
+  const sort: CatalogSort = requested && (ranked || requested === 'recent' || requested === 'name') && (requested !== 'relevance' || query)
+    ? requested : query ? 'relevance' : 'recent';
   const comparing = network === CATALOG_COMPARE;
 
   const [draft, setDraft] = useState(query);
@@ -70,7 +82,7 @@ export default function CatalogPage() {
   useEffect(() => {
     // Requisição antiga é cancelada: a resposta atrasada nunca sobrescreve a mais recente.
     const controller = new AbortController(); setError(null); setLoading(true);
-    getCatalogItems(query, quantity, page, network, controller.signal, perPage, sort)
+    getCatalogItems(query, quantity, page, network, controller.signal, perPage, sort, { category, related })
       .then(data => {
         if (controller.signal.aborted) return;
         // Página além do fim (ex.: link antigo): vai para a última que existe.
@@ -80,7 +92,7 @@ export default function CatalogPage() {
       .catch(e => { if (!controller.signal.aborted) setError((e as Error).message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [query, network, quantity, page, perPage, sort, retry]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, network, quantity, page, perPage, sort, category, related, retry]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (firstLoad.current) { firstLoad.current = false; return; }
     listTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -90,7 +102,10 @@ export default function CatalogPage() {
     if (query.length >= 3) getSimilarCatalogItems(query, '', '', controller.signal).then(setSimilar).catch(() => { });
     return () => controller.abort();
   }, [query]);
-  function handleSearch(e: FormEvent) { e.preventDefault(); patch({ q: draft.trim() || null }); }
+  // Pesquisa nova sempre volta aos produtos "fortes" (sai da lista de relacionados).
+  function handleSearch(e: FormEvent) { e.preventDefault(); patch({ q: draft.trim() || null, relacionados: null }); }
+  const counts = new Map((result?.search?.categories ?? []).map(c => [c.id, c.count]));
+  const search = result?.search ?? null;
 
   return <div className="pc-catalog-full">
     <Link className="pc-back" to="/"><ArrowLeft size={17} /> Voltar ao início</Link>
@@ -104,15 +119,23 @@ export default function CatalogPage() {
     <form className="pc-catalog-searchbar" onSubmit={handleSearch} role="search"><Search size={20} /><input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Pesquise arroz, feijão, marca ou código de barras..." aria-label="Pesquisar todos os produtos do catálogo" /><button className="pc-btn" type="submit">Buscar <ArrowRight size={16} /></button></form>
     <div className="pc-catalog-filters">
       <label>Mercado <select value={network} onChange={e => patch({ mercado: networkSlug(e.target.value) || null })}><option value="">Todos os catálogos</option><option value="Atacadão">Somente Atacadão</option><option value="Mateus Mais">Somente Mateus Mais</option><option value={CATALOG_COMPARE}>Comparar Atacadão + Mateus</option></select></label>
-      <label>Ordenar por <select value={sort} onChange={e => patch({ ordem: e.target.value === 'name' ? 'nome' : null })}><option value="recent">Coleta mais recente</option><option value="name">Nome (A–Z)</option></select></label>
+      <label>Categoria <select value={category ?? ''} onChange={e => patch({ categoria: e.target.value || null })}><option value="">Todas as categorias</option>{CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}{query && counts.size ? ` (${counts.get(c.id) ?? 0})` : ''}</option>)}</select></label>
+      <label>Ordenar por <select value={sort} onChange={e => { const next = e.target.value as CatalogSort; patch({ ordem: next === (query ? 'relevance' : 'recent') ? null : sortParam(next) }); }}>
+        {query && <option value="relevance">Mais relevantes</option>}
+        {ranked && <option value="price">Menor preço</option>}
+        <option value="recent">Coleta mais recente</option><option value="name">Nome (A–Z)</option></select></label>
       <label>Quantidade por produto <input type="number" min={1} max={999} value={quantity} onChange={e => { const value = Number(e.target.value); if (Number.isSafeInteger(value) && value >= 1) patch({ qtd: value > 1 ? String(Math.min(999, value)) : null }); }} /></label>
       <span className="pc-muted">Quantidade mínima de atacado respeitada automaticamente</span>
     </div>
-    <div className="pc-catalog-totalbar" ref={listTop}><strong aria-live="polite">{loading && !result ? 'Buscando...' : comparing ? `${(result?.total ?? 0).toLocaleString('pt-BR')} produtos nas duas redes` : `${(result?.total ?? 0).toLocaleString('pt-BR')} produtos encontrados`}</strong><span>{comparing ? 'Mesmo código de barras (GTIN/EAN) no Atacadão e no Mateus Mais. De cada rede aparece a unidade mais barata.' : 'Contagem feita no banco para a pesquisa e os filtros atuais.'}</span></div>
+    <div className="pc-catalog-totalbar" ref={listTop}><strong aria-live="polite">{loading && !result ? 'Buscando...' : search?.showing === 'related' ? `${(result?.total ?? 0).toLocaleString('pt-BR')} produtos relacionados` : comparing ? `${(result?.total ?? 0).toLocaleString('pt-BR')} produtos nas duas redes` : `${(result?.total ?? 0).toLocaleString('pt-BR')} produtos encontrados`}</strong><span>{comparing ? 'Mesmo código de barras (GTIN/EAN) no Atacadão e no Mateus Mais. De cada rede aparece a unidade mais barata.' : 'Contagem feita no banco para a pesquisa e os filtros atuais.'}</span></div>
     {error && <div className="pc-api-error" role="alert"><AlertCircle size={18} /><span>{error}</span><button type="button" onClick={() => setRetry(n => n + 1)}><RefreshCw size={16} /> Repetir</button></div>}
     {loading && !result && <div className="pc-catalog-item-grid" aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <div key={i} className="pc-catalog-item-card pc-skeleton" />)}</div>}
     {loading && <p className="pc-visually-hidden" role="status">Carregando produtos...</p>}
-    {!loading && !error && result?.items.length === 0 && <div className="pc-empty"><Search size={28} /><h2>Nenhum produto nessa pesquisa</h2><p>{query ? 'Tente outro termo, uma marca ou o código de barras.' : 'Ainda não há produtos coletados para este filtro.'}</p>{(query || network) && <button type="button" className="pc-btn" onClick={() => setUrl({})}>Limpar filtros</button>}</div>}
+    {!error && result && <SearchNotice summary={search} shown={loading ? -1 : result.items.length}
+      onShowRelated={() => patch({ relacionados: '1', categoria: null })} onHideRelated={() => patch({ relacionados: null })}
+      onAllNetworks={network ? () => patch({ mercado: null }) : undefined}
+      onClearFilters={category ? () => patch({ categoria: null }) : undefined} />}
+    {!loading && !error && result?.items.length === 0 && (!search || search.showing === 'all') && <div className="pc-empty"><Search size={28} /><h2>Nenhum produto nessa pesquisa</h2><p>{query ? 'Tente outro termo, uma marca ou o código de barras.' : 'Ainda não há produtos coletados para este filtro.'}</p>{(query || network || category) && <button type="button" className="pc-btn" onClick={() => setUrl({})}>Limpar filtros</button>}</div>}
     {!error && result && result.items.length > 0 && <div className={`pc-catalog-item-grid ${loading ? 'is-refreshing' : ''}`} aria-busy={loading}>{result.items.map(item => <article key={item.gtin} className="pc-catalog-item-card">
       <div className="pc-catalog-item-top"><span className="pc-catalog-eyebrow">GTIN {item.gtin}</span><span className="pc-catalog-mark">{item.storesCount} {item.storesCount === 1 ? 'unidade' : 'unidades'}</span></div>
       <div className="pc-catalog-item-head"><ProductImage src={item.image} alt={item.product?.name ?? ''} size="md" /><div><h2>{item.product?.name}</h2><p>{productSubtitle(item.product?.name ?? '', item.product?.brand, item.product?.size)}</p></div></div>

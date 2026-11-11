@@ -7,6 +7,7 @@ import { useUserLocation } from '../context/LocationContext';
 import { dateTime, productSubtitle, productTitle, referenceLabel, shortDate, sourceTypeLabel } from '../format';
 import Pagination from '../components/Pagination';
 import ProductImage from '../components/ProductImage';
+import SearchNotice from '../components/SearchNotice';
 
 const PER_PAGE = [20, 40, 60] as const;
 const CATALOG_PER_PAGE = 12;
@@ -19,7 +20,10 @@ export default function ResultsPage() {
   const mode: PriceMode = params.get('modo') === 'demo' ? 'demo' : 'real';
   const page = Math.max(1, Number(params.get('pagina')) || 1);
   const perPage = (PER_PAGE as readonly number[]).includes(Number(params.get('por'))) ? Number(params.get('por')) : 20;
-  const sort = params.get('ordem') === 'distancia' && location ? 'distance' : params.get('ordem') === 'nome' ? 'name' : 'price';
+  // Com pesquisa, o padrão é "mais relevantes"; preço, nome e distância valem dentro da relevância.
+  const ordem = params.get('ordem');
+  const sort = ordem === 'distancia' && location ? 'distance' : ordem === 'nome' ? 'name' : ordem === 'preco' || !query ? 'price' : 'relevance';
+  const related = params.get('relacionados') === '1' && Boolean(query);
   const storeId = Number(params.get('loja')) || null;
   const catalogPage = Math.max(1, Number(params.get('cat')) || 1);
 
@@ -50,14 +54,14 @@ export default function ResultsPage() {
   }, { replace: true });
 
   useEffect(() => { setDraft(query); }, [query]);
-  useEffect(() => { const t = setTimeout(() => { if (draft.trim() !== query) patch({ q: draft.trim() || null }); }, 400); return () => clearTimeout(t); }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const t = setTimeout(() => { if (draft.trim() !== query) patch({ q: draft.trim() || null, relacionados: null }); }, 400); return () => clearTimeout(t); }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const t = setTimeout(() => setSettled({ query, radius, maxPrice }), 350); return () => clearTimeout(t); }, [query, radius, maxPrice]);
 
   const price = Number(settled.maxPrice.replace(',', '.'));
   useEffect(() => {
     const controller = new AbortController(); setLoading(true); setApiError(null);
     searchOffers({
-      query: settled.query, location, radiusKm: settled.radius, mode, quantity, page, perPage, sort, storeId,
+      query: settled.query, location, radiusKm: settled.radius, mode, quantity, page, perPage, sort, storeId, related,
       maxPrice: Number.isFinite(price) && price > 0 ? price : null, freshHours: onlyFresh ? 24 : null,
     }, controller.signal)
       .then(result => {
@@ -67,7 +71,7 @@ export default function ResultsPage() {
       })
       .catch(e => { if (!controller.signal.aborted) { setApiError((e as Error).message); setLoading(false); } });
     return () => controller.abort();
-  }, [settled, location, mode, quantity, page, perPage, sort, storeId, onlyFresh, retry]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settled, location, mode, quantity, page, perPage, sort, storeId, onlyFresh, related, retry]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (mode !== 'real') { setCatalog(null); setCatalogError(null); setCatalogLoading(false); return; }
@@ -105,10 +109,13 @@ export default function ResultsPage() {
         <label className="pc-switch-row"><input type="checkbox" checked={onlyFresh} onChange={e => { setOnlyFresh(e.target.checked); patch({}); }} /> Apenas preços das últimas 24 h</label>
         <p className="pc-muted">Compara sempre o mesmo produto (mesmo código de barras), sem misturar embalagens. A distância é em linha reta, não o percurso pelas ruas.</p>
       </aside>
-      <section className="pc-results-main" ref={listTop}><div className="pc-results-actions"><span>{mode === 'demo' ? 'Exemplos fictícios' : 'Menor oferta por produto'}</span><div><select aria-label="Ordenar" className="pc-select" value={sort} onChange={e => patch({ ordem: e.target.value === 'distance' ? 'distancia' : e.target.value === 'name' ? 'nome' : null })}><option value="price">Menor preço</option><option value="name">Nome (A–Z)</option><option value="distance" disabled={!location}>Loja mais próxima{location ? '' : ' (ative o GPS)'}</option></select></div></div>
+      <section className="pc-results-main" ref={listTop}><div className="pc-results-actions"><span>{mode === 'demo' ? 'Exemplos fictícios' : 'Menor oferta por produto'}</span><div><select aria-label="Ordenar" className="pc-select" value={sort} onChange={e => patch({ ordem: e.target.value === 'distance' ? 'distancia' : e.target.value === 'name' ? 'nome' : e.target.value === 'price' && query ? 'preco' : null })}>{query && <option value="relevance">Mais relevantes</option>}<option value="price">Menor preço</option><option value="name">Nome (A–Z)</option><option value="distance" disabled={!location}>Loja mais próxima{location ? '' : ' (ative o GPS)'}</option></select></div></div>
         {loading && !data && <div className="pc-offer-rows" aria-hidden="true">{Array.from({ length: 4 }, (_, i) => <div key={i} className="pc-offer-row pc-skeleton" />)}</div>}
         {loading && <p className="pc-visually-hidden" role="status">Pesquisando ofertas...</p>}
         {apiError && <div className="pc-api-error" role="alert"><AlertCircle size={20} /><span>{apiError}</span><button type="button" onClick={() => setRetry(r => r + 1)}><RefreshCw size={16} /> Tentar novamente</button></div>}
+        {!apiError && data && <SearchNotice summary={data.search} shown={loading ? -1 : products.length} where={mode === 'demo' ? 'nos exemplos de demonstração' : 'nas lojas do mapa'}
+          onShowRelated={() => patch({ relacionados: '1' })} onHideRelated={() => patch({ relacionados: null })}
+          onClearFilters={maxPrice || onlyFresh || storeId ? () => { setMaxPrice(''); setOnlyFresh(false); patch({ loja: null }); } : undefined} />}
         {!apiError && data && (products.length ? <div className={`pc-offer-rows ${loading ? 'is-refreshing' : ''}`} aria-busy={loading}>{products.map(g => {
           const { best } = g;
           return <article className="pc-offer-row pc-product-result" key={g.productId}>
@@ -117,7 +124,7 @@ export default function ResultsPage() {
             <div className="pc-offer-price"><strong className="pc-money">{brl(best.price)}</strong><small>Por unidade{best.minimumQuantity > 1 ? ` · mín. ${best.minimumQuantity} un.` : ''}</small>{g.savings !== null && g.savings > 0 && <span className="pc-savings-chip"><Check size={13} /> Diferença de até {brl(g.savings)}</span>}</div>
             <div className="pc-result-actions"><Link aria-label={`Ver todas as lojas de ${best.product.name}`} className="pc-round-arrow" to={`/produto/${g.productId}?mode=${mode}&quantity=${quantity}`}><ArrowRight size={19} /></Link>{mode === 'real' && best.sourceUrl && <a href={best.sourceUrl} rel="noopener noreferrer" target="_blank" aria-label="Abrir fonte da oferta"><ExternalLink size={16} /></a>}</div>
           </article>;
-        })}</div> : <div className="pc-empty"><Search size={32} /><h2>Nenhuma oferta encontrada</h2><p>{mode === 'real' ? 'Nenhuma loja do mapa tem preço para esta pesquisa com os filtros atuais. Veja mais abaixo os catálogos online ou ajuste os filtros.' : 'Experimente pesquisar “arroz”, “leite”, ampliar o raio ou ajustar a quantidade.'}</p>{(query || maxPrice || onlyFresh || storeId) && <button type="button" className="pc-btn" onClick={() => { setMaxPrice(''); setOnlyFresh(false); setParams(mode === 'demo' ? { modo: 'demo' } : {}); }}>Limpar filtros</button>}</div>)}
+        })}</div> : data.search && data.search.showing !== 'all' ? null : <div className="pc-empty"><Search size={32} /><h2>Nenhuma oferta encontrada</h2><p>{mode === 'real' ? 'Nenhuma loja do mapa tem preço para esta pesquisa com os filtros atuais. Veja mais abaixo os catálogos online ou ajuste os filtros.' : 'Experimente pesquisar “arroz”, “leite”, ampliar o raio ou ajustar a quantidade.'}</p>{(query || maxPrice || onlyFresh || storeId) && <button type="button" className="pc-btn" onClick={() => { setMaxPrice(''); setOnlyFresh(false); setParams(mode === 'demo' ? { modo: 'demo' } : {}); }}>Limpar filtros</button>}</div>)}
         {data && !apiError && <Pagination page={data.page} pages={data.pages} total={data.total} perPage={perPage} perPageOptions={PER_PAGE} disabled={loading} label="produtos"
           onPage={p => patch({ pagina: p > 1 ? String(p) : null }, ['cat'])} onPerPage={n => patch({ por: n === 20 ? null : String(n) })} />}
       </section>
