@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, CircleUserRound, LogOut, MapPin, Menu, Navigation, Radio, PauseCircle, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import BrandMark from './BrandMark';
 import { neighborhoods, useUserLocation } from '../context/LocationContext';
 
 export default function SiteNav(){
@@ -13,7 +14,7 @@ export default function SiteNav(){
   const close=()=>setOpen(false);
   const firstName=user?.name.split(' ')[0]??'';
   return <header className="p6-header">
-    <Link to="/" className="p6-brand" onClick={close}><span className="p6-tag"><span/></span><span>PreçoClaro</span></Link>
+    <Link to="/" className="p6-brand" onClick={close} aria-label="PreçoClaro — início"><BrandMark/><span>PreçoClaro</span></Link>
     <nav aria-label="Navegação principal" className={`p6-nav ${open?'open':''}`}>
       <NavLink end className={({isActive})=>`p6-nav-link ${isActive?'selected':''}`} to="/" onClick={close}>Início</NavLink>
       <NavLink className={({isActive})=>`p6-nav-link ${isActive||pathname.startsWith('/produto/')?'selected':''}`} to="/comparar" onClick={close}>Comparar preços</NavLink>

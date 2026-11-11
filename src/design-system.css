@@ -303,3 +303,71 @@
   font-family: 'DM Sans', Arial, sans-serif; font-style: normal; letter-spacing: -.005em; line-height: 1.32;
 }
 .pc-page-content .pc-form-card h2, .pc-page-content .pc-card-head h2 { font-size: 19px; font-weight: 700; color: var(--pc-green-900); }
+
+
+/* =====================================================================================
+ * IDENTIDADE VISUAL — fundo off-white, sem moldura externa, marca de duas folhas
+ * Só apresentação: nenhuma regra aqui muda comportamento.
+ * ===================================================================================== */
+:root {
+  /* Fundo único da aplicação (branco quente, quase branco). Trocar aqui muda o site todo. */
+  --pc-page: #f8f7f3;
+  /* Superfícies um degrau acima do fundo: cartões, formulários, menus. */
+  --pc-card: #fffefb;
+  --pc-card-soft: #fbfaf6;
+  --pc-hairline: #e9e6dd;
+  /* Largura máxima do conteúdo; o fundo continua ocupando a janela inteira. */
+  --pc-content-max: 1320px;
+  --pc-gutter: clamp(18px, 4.6vw, 64px);
+  --pc-leaf-dark: #4f7a28;
+  --pc-leaf-light: #a9cf3f;
+  --pc-leaf-vein: var(--pc-page);
+  /* Variáveis antigas passam a apontar para os tokens novos. */
+  --bg: var(--pc-page);
+  --pc-cream: var(--pc-page);
+  --pc-surface: var(--pc-card);
+  --line: var(--pc-hairline);
+  background: var(--pc-page);
+}
+html, body, #root { background: var(--pc-page); }
+
+/* --- sem moldura: o painel deixa de ser um cartão gigante --- */
+.site-shell,
+.pc-v6-page {
+  max-width: none; margin: 0; border-radius: 0; box-shadow: none; background: var(--pc-page);
+}
+/* O conteúdo continua limitado e centralizado; quem cresce é só o fundo. */
+.site-shell { padding-left: max(var(--pc-gutter), calc((100% - var(--pc-content-max)) / 2)); padding-right: max(var(--pc-gutter), calc((100% - var(--pc-content-max)) / 2)); }
+.pc-v6-page { --p6-paper: var(--pc-page); padding-left: max(0px, calc((100% - 1360px) / 2)); padding-right: max(0px, calc((100% - 1360px) / 2)); }
+.pc-page-shell > .p6-header { margin: 0; padding-left: 0; padding-right: 0; }
+.pc-page-content { padding-left: 0; padding-right: 0; }
+.pc-page-footer { padding-left: 0; padding-right: 0; border-top-color: var(--pc-hairline); }
+.p6-footer { background: transparent; border-top-color: var(--pc-hairline); }
+
+/* --- navbar integrada ao fundo --- */
+.p6-header { background: transparent; }
+.p6-location > button, .p6-enter { background: transparent; }
+.p6-location-pop { background: var(--pc-card); }
+@media (max-width: 1180px) { .p6-nav { background: var(--pc-card); border-color: var(--pc-hairline); } }
+
+/* --- marca de duas folhas --- */
+.pc-brandmark { flex: none; width: 27px; height: 27px; display: block; }
+.p6-brand { gap: 8px; letter-spacing: -.9px; color: #1c2414; }
+.p6-brand .pc-brandmark { margin-top: -2px; }
+.p6-footer-logo { gap: 7px; }
+.p6-footer-logo .pc-brandmark { width: 21px; height: 21px; }
+.p6-phone-brand .pc-brandmark { width: 11px; height: 11px; }
+@media (max-width: 520px) { .pc-brandmark { width: 24px; height: 24px; } .p6-brand { gap: 7px; } }
+
+/* --- tons de bege que cobriam áreas grandes passam ao off-white ou à superfície --- */
+.pc-product-visual { background: linear-gradient(140deg, var(--pc-card), #f1f0ea); }
+.pc-pimg { background: linear-gradient(140deg, var(--pc-card-soft), #efeee8); }
+.pc-skeleton { background: #f1f0ea; }
+.pc-soft-label { background: #f1f0ea; }
+.pc-difference.is-equal { background: #f4f3ee; border-color: #e5e3da; }
+.pc-form-note, .pc-catalog-empty, .pc-online-empty { background: var(--pc-card-soft); }
+
+/* --- ritmo vertical e larguras em telas muito grandes ou muito pequenas --- */
+.pc-page-content { padding-top: clamp(14px, 2.2vw, 28px); padding-bottom: clamp(56px, 7vw, 96px); }
+.pc-page-content > div > h1 { margin-bottom: clamp(8px, 1vw, 14px); }
+@media (max-width: 520px) { :root { --pc-gutter: 16px; } }

@@ -7,6 +7,7 @@ import {
   Smartphone, ScanLine, TrendingUp, Grid2X2, Flame
 } from 'lucide-react';
 import SiteNav from './components/SiteNav';
+import BrandMark from './components/BrandMark';
 import { brl } from './data';
 import './home-fidelity.css';
 
@@ -39,7 +40,8 @@ const benefits = [
   { icon:<UsersRound size={26}/>, title:'Ajude a comunidade', body:'Compartilhe preços e mantenha as informações da sua região atualizadas.', path:'/perfil' }
 ];
 
-function TagLogo(){return <span className="p6-tag" aria-hidden="true"><span/></span>}
+// Marca de duas folhas (a antiga etiqueta foi aposentada); o nome da função foi mantido.
+function TagLogo(){return <BrandMark/>}
 function DecorativeLeaves({ className = '' }: {className?:string}) {
   return <div aria-hidden="true" className={`p6-leaf-art ${className}`}>
     <span className="p6-leaf p6-leaf-one"/><span className="p6-leaf p6-leaf-two"/><span className="p6-leaf p6-leaf-three"/>
