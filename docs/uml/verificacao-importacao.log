@@ -1,12 +1,13 @@
-diagramas encontrados: 8
+diagramas encontrados: 9
 - Diagrama de Caso de Uso [UseCaseDiagram]: 7 elementos graficos
 - Diagrama de Pacotes (MVC) [ClassDiagram]: 6 elementos graficos
 - Diagrama de Classes [ClassDiagram]: 12 elementos graficos
 - Diagrama de Objetos [ObjectDiagram]: 6 elementos graficos
-- Diagrama de Sequência [SequenceDiagram]: 9 elementos graficos
+- Diagrama de Sequência 1 — requisição e resposta [SequenceDiagram]: 7 elementos graficos
+- Diagrama de Sequência 2 — processamento da busca [SequenceDiagram]: 5 elementos graficos
 - Diagrama de Comunicação [CommunicationDiagram]: 10 elementos graficos
-- Diagrama de Máquina de Estados [StateMachineDiagram]: 10 elementos graficos
-- Diagrama de Atividades [ActivityDiagram]: 4 elementos graficos
-esperados: 8 faltando: []
+- Diagrama de Máquina de Estados [StateMachineDiagram]: 12 elementos graficos
+- Diagrama de Atividades [ActivityDiagram]: 5 elementos graficos
+esperados: 9 faltando: []
 edicao aceita: Diagrama de Caso de Uso (editado)
 apos desfazer: Diagrama de Caso de Uso
