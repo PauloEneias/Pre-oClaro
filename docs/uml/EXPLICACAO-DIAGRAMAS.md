@@ -42,21 +42,19 @@ Referências gerais usadas em todas as seções:
 
 **Definição.** É um diagrama estrutural que agrupa elementos em **pacotes** e mostra as **dependências** entre eles. Serve para enxergar a arquitetura em camadas e evitar dependências circulares.
 
-**Aplicação.** Os pacotes têm os nomes reais dos diretórios:
-- `src/pages`, `src/components`, `src/context` e `src/api.ts` (View no navegador);
-- `backend/src/controllers` (Controller) e `backend/src/http` (sessão, CSRF e erros);
-- `backend/src/services` e as regras puras (`searchRelevance.ts`, `catalogComparison.ts`, `csv.ts`, `location.ts`);
-- `backend/src/repositories` (Model) e `backend/src/integrations` + `osm.ts` (fontes externas);
-- MySQL (`backend/sql`).
+**Aplicação.** As três camadas do MVC são **pacotes que contêm** os pacotes de código, com os nomes reais dos diretórios:
+- **View — frontend React (`src/`):** `pages` (telas), `components`, `context` (Auth, Basket, Location) e `api.ts` (cliente HTTP);
+- **Controller — backend Fastify:** `controllers` (rotas `/api`) e `http` (sessão, CSRF e erros);
+- **Model — regras de negócio e dados:** `services` (casos de uso), regras puras (`searchRelevance.ts`, `catalogComparison.ts`), `repositories` (SQL) e `integrations` + `osm.ts` (coletores);
+- fora das camadas: **MySQL** (`backend/sql`: tabelas, views, procedures) e **Externo** (OpenStreetMap e sites das redes).
 
 **MVC adaptado ao React + Fastify.**
-- A **View** roda no navegador.
-- O **Controller** é a camada HTTP do servidor (`registerCatalogRoutes`, `registerListRoutes` etc.).
-- O **Model** é o conjunto repositories + banco.
-- Os **services** formam uma camada intermediária que guarda as regras de negócio. Com isso o controller fica fino e as regras podem ser testadas sem HTTP.
-- O único elo entre front e back é `api.ts → controllers`, rotulado HTTP/JSON.
+- A **View** roda no navegador e só fala com o servidor por `api.ts`.
+- O **Controller** é a camada HTTP do servidor (`registerCatalogRoutes`, `registerListRoutes` etc.). Ele é fino: valida a entrada e chama um service.
+- O **Model** reúne os services (regras de negócio, testáveis sem HTTP), as regras puras, os repositories que falam SQL e os coletores que buscam dados externos.
+- O único elo entre front e back é `api.ts → controllers`, rotulado **HTTP/JSON**.
 
-**Como ler as setas.** A seta tracejada `«use»` (dependência de uso) vai do pacote que **depende** para o pacote **usado**. Todas apontam "para baixo" (View → Controller → Service → Model → MySQL), o que mostra que não há ciclos.
+**Como ler as setas.** A seta tracejada `«use»` (dependência de uso) vai do pacote que **depende** para o pacote **usado**. Elas descem de camada em camada (View → Controller → Model → MySQL/Externo) e, dentro de cada camada, nunca voltam. Por isso não há dependência circular.
 
 ## 3. Diagrama de Classes (`03-diagrama-classes.png`)
 

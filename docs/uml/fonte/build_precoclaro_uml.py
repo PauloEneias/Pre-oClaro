@@ -220,27 +220,35 @@ def caso_de_uso():
 # 2. DIAGRAMA DE PACOTES (MVC)
 # =============================================================================================
 def pacotes():
+    """Três camadas MVC como pacotes que CONTÊM os pacotes de código; banco e serviços externos fora.
+    Layout em grade (colunas x = 80, 440, 800) para que as setas «use» sejam curtas e não se cruzem."""
     pkg = U.createPackage(u"02 Pacotes MVC", ROOT)
+    L = {
+        "view": U.createPackage(u"View — frontend React (src/)", pkg),
+        "ctrl": U.createPackage(u"Controller — backend Fastify (backend/src)", pkg),
+        "model": U.createPackage(u"Model — regras de negócio e dados (backend/src)", pkg),
+    }
     P = {}
     defs = [
-        ("pages", u"src/pages — View (telas React)"),
-        ("components", u"src/components — View (componentes)"),
-        ("context", u"src/context — estado global (Auth, Basket, Location)"),
-        ("api", u"src/api.ts — cliente HTTP"),
-        ("controllers", u"backend/src/controllers — Controller (Fastify)"),
-        ("http", u"backend/src/http — sessão, CSRF, erros"),
-        ("services", u"backend/src/services — regras de negócio"),
-        ("rules", u"backend/src/*.ts — regras puras (searchRelevance, catalogComparison, csv, location)"),
-        ("repositories", u"backend/src/repositories — Model (SQL)"),
-        ("integrations", u"backend/src/integrations + osm.ts — fontes externas e coletores"),
-        ("mysql", u"MySQL — backend/sql (tabelas, views, procedures)"),
+        ("pages", "view", u"pages (telas)"),
+        ("components", "view", u"components"),
+        ("context", "view", u"context (Auth, Basket, Location)"),
+        ("api", "view", u"api.ts (cliente HTTP)"),
+        ("http", "ctrl", u"http (sessão, CSRF, erros)"),
+        ("controllers", "ctrl", u"controllers (rotas /api)"),
+        ("rules", "model", u"regras puras (searchRelevance, catalogComparison)"),
+        ("services", "model", u"services (casos de uso)"),
+        ("integrations", "model", u"integrations + osm.ts (coletores)"),
+        ("repositories", "model", u"repositories (SQL)"),
     ]
-    for key, name in defs:
-        P[key] = U.createPackage(name, pkg)
-    deps = [("pages", "components"), ("pages", "context"), ("pages", "api"), ("components", "context"), ("components", "api"),
-            ("context", "api"), ("api", "controllers"), ("controllers", "http"), ("controllers", "services"), ("http", "services"),
-            ("services", "repositories"), ("services", "rules"), ("services", "integrations"), ("repositories", "mysql"),
-            ("integrations", "rules"), ("integrations", "mysql")]
+    for key, layer, name in defs:
+        P[key] = U.createPackage(name, L[layer])
+    P["mysql"] = U.createPackage(u"MySQL (backend/sql: tabelas, views, procedures)", pkg)
+    P["ext"] = U.createPackage(u"Externo (OpenStreetMap, sites das redes)", pkg)
+    deps = [("pages", "components"), ("components", "context"), ("pages", "api"), ("components", "api"),
+            ("context", "api"), ("api", "controllers"), ("controllers", "http"), ("controllers", "services"),
+            ("services", "rules"), ("services", "integrations"), ("services", "repositories"),
+            ("repositories", "mysql"), ("integrations", "ext"), ("integrations", "mysql")]
     rel = []
     for a, b in deps:
         dep = U.createUsage(P[a], P[b])
@@ -248,21 +256,68 @@ def pacotes():
             dep.setName(u"HTTP/JSON")
         rel.append(dep)
     d = U.createClassDiagram(u"Diagrama de Pacotes (MVC)", pkg, None)
-    n1 = note(d, u"MVC adaptado: a View é o React (navegador); o Controller é a camada de rotas Fastify; "
-                 u"o Model são os repositories + MySQL. Os services ficam entre Controller e Model com as regras "
-                 u"de negócio. As setas «use» seguem um único sentido (sem dependência circular).")
+    n1 = note(d, u"MVC adaptado: a View é o React no navegador e fala com o backend só por HTTP/JSON (api.ts); "
+                 u"o Controller são as rotas Fastify; o Model reúne services, regras puras, repositories e coletores, "
+                 u"e persiste no MySQL. As setas «use» seguem um único sentido, de cima para baixo (sem dependência circular).")
     h = DS.getDiagramHandle(d)
     try:
-        pos = {"pages": (40, 40), "components": (420, 40), "context": (800, 40),
-               "api": (420, 230), "controllers": (420, 400), "http": (800, 400),
-               "services": (420, 570), "rules": (800, 570), "integrations": (40, 740),
-               "repositories": (420, 740), "mysql": (420, 910)}
+        c1, c2, c3, W, H = 80, 440, 800, 300, 80
+        node(h, L["view"], 40, 20, 1100, 290)
+        node(h, L["ctrl"], 40, 360, 1100, 170)
+        node(h, L["model"], 40, 580, 1100, 290)
+        pos = {"pages": (c1, 80), "components": (c2, 80), "context": (c3, 80), "api": (c2, 210),
+               "http": (c1, 420), "controllers": (c2, 420),
+               "rules": (c1, 640), "services": (c2, 640), "integrations": (c3, 640), "repositories": (c2, 770),
+               "mysql": (c2, 930), "ext": (c3, 930)}
         for k, (x, y) in pos.items():
-            node(h, P[k], x, y, 330, 110)
+            for g in node(h, P[k], x, y, W, H):
+                g.setLocation(x, y)   # dentro de um pacote o unmask pode deslocar o nó; fixa a posição
         if n1 is not None:
-            node(h, n1, 40, 400, 330, 250)
-        for r in rel:
+            node(h, n1, 40, 1060, 1100, 70)
+        # Pontos de ancoragem (coordenadas absolutas do diagrama) para traçar cada seta à mão,
+        # em ângulo reto, sem atravessar outros pacotes.
+        def top(k, f=0.5):    x, y = pos[k]; return (x + int(W * f), y)
+        def bottom(k, f=0.5): x, y = pos[k]; return (x + int(W * f), y + H)
+        def left(k, f=0.5):   x, y = pos[k]; return (x, y + int(H * f))
+        def right(k, f=0.5):  x, y = pos[k]; return (x + W, y + int(H * f))
+        cy = lambda k: pos[k][1] + H // 2
+        # As setas verticais usam a fração 0.3 da largura (cai sempre na aba do pacote) e as horizontais
+        # a fração 0.8 da altura (cai no corpo, abaixo das abas de duas ou três linhas).
+        V, Hz = 0.3, 0.8
+        routes = {
+            ("pages", "components"): [right("pages", Hz), left("components", Hz)],
+            ("components", "context"): [right("components", Hz), left("context", Hz)],
+            ("pages", "api"): [bottom("pages"), (bottom("pages")[0], cy("api") + 10), left("api", 0.62)],
+            ("components", "api"): [bottom("components", V), top("api", V)],
+            ("context", "api"): [bottom("context"), (bottom("context")[0], cy("api") + 10), right("api", 0.62)],
+            ("api", "controllers"): [bottom("api", V), top("controllers", V)],
+            ("controllers", "http"): [left("controllers", Hz), right("http", Hz)],
+            ("controllers", "services"): [bottom("controllers", V), top("services", V)],
+            ("services", "rules"): [left("services", Hz), right("rules", Hz)],
+            ("services", "integrations"): [right("services", Hz), left("integrations", Hz)],
+            ("services", "repositories"): [bottom("services", V), top("repositories", V)],
+            ("repositories", "mysql"): [bottom("repositories", V), top("mysql", V)],
+            ("integrations", "ext"): [bottom("integrations", V), top("ext", V)],
+            ("integrations", "mysql"): [bottom("integrations", 0.1), (bottom("integrations", 0.1)[0], 900),
+                                        (top("mysql", 0.55)[0], 900), top("mysql", 0.55)],
+        }
+        for (a, b), r in zip(deps, rel):
             link(h, r)
+            for g in h.getDiagramGraphics(r):
+                try:
+                    path = g.getPath()
+                    p0 = path.getPoints().get(0)
+                    pts = []
+                    for (x, y) in routes[(a, b)]:
+                        p = p0.getCopy(); p.setLocation(x, y); pts.append(p)
+                    from java.util import ArrayList
+                    jl = ArrayList()
+                    for p in pts:
+                        jl.add(p)
+                    path.setPoints(jl)
+                    g.setPath(path)
+                except Throwable as e:
+                    log("   rota", a, b, e)
         h.save()
     finally:
         h.close()
